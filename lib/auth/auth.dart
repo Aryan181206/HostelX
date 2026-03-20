@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:amber_hackathon/home/homewrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // navigate to DashboardScreen()
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+          MaterialPageRoute(builder: (context) => const HomeWrapper()),
         );
 
       } else {

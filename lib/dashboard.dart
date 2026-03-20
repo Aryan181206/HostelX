@@ -57,7 +57,7 @@ class Dashboard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+
 
               /// 🔹 Notice Board
               const Text("Notice Board", style: sectionTitle),
