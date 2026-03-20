@@ -151,17 +151,17 @@ class _HomeWrapperState extends State<HomeWrapper> {
           NavigationDestination(
             icon: Icon(Icons.restaurant_outlined, color: Color(0xFF9CA3AF)),
             selectedIcon: Icon(Icons.restaurant, color: Color(0xFF4338CA)),
-            label: 'Mess',
+            label: 'Lost/Found',
           ),
           NavigationDestination(
             icon: Icon(Icons.cleaning_services_outlined, color: Color(0xFF9CA3AF)),
             selectedIcon: Icon(Icons.cleaning_services, color: Color(0xFF4338CA)),
-            label: 'Services',
+            label: 'Booking',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline, color: Color(0xFF9CA3AF)),
             selectedIcon: Icon(Icons.person, color: Color(0xFF4338CA)),
-            label: 'Profile',
+            label: 'Market Place',
           ),
         ],
       ),

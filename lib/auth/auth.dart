@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:ui';
+
 import 'package:amber_hackathon/home/homewrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/user_sheet_api.dart';
-import '../dashboard.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,17 +16,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // ── Controllers ──────────────────────────────────────────────
-  final _rollController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  // Controllers
+  final TextEditingController _rollController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // ── UI State ─────────────────────────────────────────────────
+  // UI State
   bool _isLoading = false;
   bool _passwordVisible = false;
   String? _errorMessage;
 
-  // ── Colors ───────────────────────────────────────────────────
+  // Colors
   static const Color indigoStart = Color(0xFF3F51B5);
   static const Color indigoEnd = Color(0xFF24389C);
   static const Color tealStart = Color(0xFF00BFA6);
@@ -47,12 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // ── Login Handler ─────────────────────────────────────────────
   Future<void> _handleLogin() async {
-    // Hide keyboard
     FocusScope.of(context).unfocus();
 
-    // Validate form fields
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() {
@@ -68,23 +64,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
+      debugPrint('Login response: $user');
+
       if (user != null) {
-        // ✅ Login success — navigate to your dashboard
-        // Pass the full user map so the next screen has all student data
-        print("login done");
-        print(user);
-        //saving the user data to shareed preference
-        SharedPreferences prefs = await SharedPreferences.getInstance();
+        debugPrint("login done");
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('user', jsonEncode(user));
 
-        // navigate to DashboardScreen()
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeWrapper()),
         );
-
       } else {
-        // ❌ Invalid credentials
         setState(() {
           _errorMessage = 'Invalid Roll Number or Password. Please try again.';
         });
@@ -92,8 +84,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Connection error. Please check your internet and retry.';
+        _errorMessage =
+        'Connection error. Please check your internet and retry.';
       });
+      debugPrint('Login error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -108,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Hero Background
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -119,10 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // 2. Abstract Shapes
+          // Decorative circle 1
           Positioned(
-            top: -size.height * 0.1,
-            left: -size.width * 0.1,
+            top: -100,
+            left: -40,
             child: Container(
               width: size.width * 0.6,
               height: size.width * 0.6,
@@ -136,9 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+
+          // Decorative circle 2
           Positioned(
-            bottom: -size.height * 0.05,
-            right: -size.width * 0.05,
+            bottom: -50,
+            right: -30,
             child: Container(
               width: size.width * 0.5,
               height: size.width * 0.5,
@@ -153,12 +149,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // 3. Main Content
+          // Main content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 32.0),
+                  horizontal: 24.0,
+                  vertical: 32.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -168,8 +166,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.holiday_village,
-                              color: Colors.white, size: 36),
+                          const Icon(
+                            Icons.holiday_village,
+                            color: Colors.white,
+                            size: 36,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'HostelX',
@@ -182,11 +183,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-
                       const SizedBox(height: 48),
 
-                      // ── Login Card ──────────────────────────────
+                      // Login Card
                       Container(
                         width: double.infinity,
                         constraints: const BoxConstraints(maxWidth: 450),
@@ -223,15 +222,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 32),
 
-                            // Roll Number
                             _buildLabel('Roll Number'),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _rollController,
                               style: GoogleFonts.inter(color: onSurface),
                               textInputAction: TextInputAction.next,
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
                                   return 'Please enter your Roll Number';
                                 }
                                 return null;
@@ -243,7 +241,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 24),
 
-                            // Password
                             _buildLabel('Password'),
                             const SizedBox(height: 8),
                             TextFormField(
@@ -252,8 +249,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: GoogleFonts.inter(color: onSurface),
                               textInputAction: TextInputAction.done,
                               onFieldSubmitted: (_) => _handleLogin(),
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
                                   return 'Please enter your Password';
                                 }
                                 return null;
@@ -269,31 +266,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                         : Icons.visibility_off_outlined,
                                     color: outline,
                                   ),
-                                  onPressed: () => setState(
-                                          () => _passwordVisible = !_passwordVisible),
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
 
-
-                            // ── Error Banner ──────────────────────
                             if (_errorMessage != null) ...[
                               const SizedBox(height: 16),
                               Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: errorRed.withOpacity(0.08),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                      color: errorRed.withOpacity(0.3)),
+                                    color: errorRed.withOpacity(0.3),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.error_outline,
-                                        color: errorRed, size: 18),
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: errorRed,
+                                      size: 18,
+                                    ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
@@ -312,7 +315,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             const SizedBox(height: 24),
 
-                            // ── Login Button ──────────────────────
                             Container(
                               width: double.infinity,
                               height: 56,
@@ -363,57 +365,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    const Icon(Icons.arrow_forward,
-                                        color: Colors.white),
+                                    const Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.white,
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // System Status
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: secondaryFixed,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'SERVER ONLINE',
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Container(
-                            width: 1,
-                            height: 12,
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            'V2.4.0 EDITORIAL',
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -466,8 +427,10 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: errorRed, width: 2),
       ),
-      contentPadding:
-      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 20,
+        horizontal: 16,
+      ),
     );
   }
 }
