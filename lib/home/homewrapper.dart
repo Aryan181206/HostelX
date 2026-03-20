@@ -21,7 +21,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
 
 
   final List<Widget> _screens = const [
-    DashboardScreen(),      // 0
+    Dashboard(),      // 0
     MessMenuScreen(),     // 1
     ComplaintsScreen(),   // 2
     SettingsScreen(),     // 3
