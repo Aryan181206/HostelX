@@ -6,7 +6,7 @@ void showNewComplaintSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent, // Handled by the container inside
+    backgroundColor: Colors.transparent,
     builder: (context) => const NewComplaintBottomSheet(),
   );
 }

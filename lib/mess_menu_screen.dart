@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_theme.dart'; // Make sure this points to your theme file
+import 'app_theme.dart';
 
 class MessMenuScreen extends StatelessWidget {
   const MessMenuScreen({super.key});
@@ -255,7 +255,7 @@ class MessMenuScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+
     );
   }
 
@@ -366,67 +366,4 @@ class MessMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.9),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(0, -8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home_outlined, 'Home'),
-                  _buildNavItem(Icons.restaurant_menu, 'Mess', isActive: true), // Set Mess to active
-                  _buildNavItem(Icons.cleaning_services_outlined, 'Services'),
-                  _buildNavItem(Icons.person_outline, 'Profile'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryFixed.withOpacity(0.5) : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isActive ? AppColors.primary : AppColors.outline,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? AppColors.primary : AppColors.outline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

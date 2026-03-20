@@ -10,54 +10,7 @@ class NoticesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(72),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: AppBar(
-              backgroundColor: Colors.white.withOpacity(0.8),
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: IconButton(
-                  icon: const Icon(Icons.menu, color: Color(0xFF4F46E5)), // Indigo-600 equivalent
-                  onPressed: () {},
-                ),
-              ),
-              title: Text(
-                'Notices',
-                style: GoogleFonts.manrope(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF4F46E5),
-                  letterSpacing: -0.5,
-                ),
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primaryContainer, width: 2),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/150?img=11'), // Placeholder avatar
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 100, left: 20, right: 20, bottom: 120),
         child: Column(
@@ -120,7 +73,7 @@ class NoticesScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+
     );
   }
 
@@ -308,68 +261,4 @@ class NoticesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home_outlined, 'Home'),
-                  _buildNavItem(Icons.restaurant, 'Mess'),
-                  _buildNavItem(Icons.room_service, 'Services', isActive: true), // Set Services to Active
-                  _buildNavItem(Icons.person_outline, 'Profile'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFEEF2FF) : Colors.transparent, // Indigo-50
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isActive ? const Color(0xFF4338CA) : const Color(0xFF94A3B8), // Indigo-700 or Slate-400
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isActive ? const Color(0xFF4338CA) : const Color(0xFF94A3B8),
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

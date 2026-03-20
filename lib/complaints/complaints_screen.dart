@@ -11,57 +11,9 @@ class ComplaintsScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(72),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: AppBar(
-              backgroundColor: Colors.white.withOpacity(0.8),
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              titleSpacing: 24,
-              title: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryContainer,
-                      image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'HostelX',
-                    style: GoogleFonts.manrope(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF4338CA), // indigo-700 equivalent
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Color(0xFF4F46E5)),
-                    onPressed: () {},
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 100, left: 24, right: 24, bottom: 120),
+        padding: const EdgeInsets.only(top: 30, left: 24, right: 24, bottom: 120),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -185,7 +137,7 @@ class ComplaintsScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+
     );
   }
 
@@ -457,67 +409,4 @@ class ComplaintsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(0, -8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home_outlined, 'Home'),
-                  _buildNavItem(Icons.report_problem, 'Complaints', isActive: true),
-                  _buildNavItem(Icons.restaurant, 'Mess'),
-                  _buildNavItem(Icons.person_outline, 'Profile'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFEEF2FF) : Colors.transparent, // indigo-50
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isActive ? const Color(0xFF4338CA) : const Color(0xFF94A3B8), // indigo-700 / slate-400
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isActive ? const Color(0xFF4338CA) : const Color(0xFF94A3B8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

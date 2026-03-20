@@ -184,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+
     );
   }
 
@@ -402,68 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(0, -8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home_outlined, 'Home'),
-                  _buildNavItem(Icons.bed_outlined, 'Rooms'),
-                  _buildNavItem(Icons.group_outlined, 'Guests'),
-                  _buildNavItem(Icons.settings, 'Settings', isActive: true),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFEEF2FF) : Colors.transparent, // Indigo-50 equivalent
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isActive ? const Color(0xFF4338CA) : const Color(0xFF9CA3AF), // Indigo-700 or Gray-400
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isActive ? const Color(0xFF4338CA) : const Color(0xFF9CA3AF),
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
+
 }
