@@ -1,13 +1,17 @@
+import 'dart:convert';
+
 import 'package:amber_hackathon/amenity_list_screen.dart';
 import 'package:amber_hackathon/home/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Import your tab screens here
 import '../complaints/complaints_screen.dart';
 import '../lost_and_found/lost_and_found_screen.dart';
 import '../mess_menu_screen.dart';
 import '../notice.dart';
+import '../profile/profile.dart';
 import '../setting.dart';
 
 
@@ -21,6 +25,23 @@ class HomeWrapper extends StatefulWidget {
 class _HomeWrapperState extends State<HomeWrapper> {
   int _currentIndex = 0;
 
+  Map<String, dynamic>? _userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      setState(() {
+        _userData = jsonDecode(userJson);
+      });
+    }
+  }
 
   final List<Widget> _screens = const [
     Dashboard(),      // 0
@@ -44,6 +65,11 @@ class _HomeWrapperState extends State<HomeWrapper> {
 
             GestureDetector(
               onTap: () {
+                // navigate to profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
 
               },
               child: Container(
@@ -72,7 +98,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hello Gujjar',
+                  _userData != null ? (_userData!['Name'] ?? 'Student') : 'Loading...',
                   style: GoogleFonts.manrope(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -80,7 +106,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
                   ),
                 ),
                 Text(
-                  'Room 214, Block B',
+                 _userData !=null ? ('Room ${_userData!['Room Number'] ?? 'N/A'}, Block ${_userData!['Hostel Block'] ?? 'N/A'}') : 'Room Loading...',
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -91,40 +117,6 @@ class _HomeWrapperState extends State<HomeWrapper> {
             ),
           ],
         ),
-        actions: [
-          // Notification Bell
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.notifications,
-                    color: Color(0xFF5655D1),
-                    size: 28,
-                  ),
-                  onPressed: () {
-                    // Handle notifications
-                  },
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
 
       body: IndexedStack(
