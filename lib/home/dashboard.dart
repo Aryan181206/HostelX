@@ -6,6 +6,7 @@ import 'package:amber_hackathon/notice.dart';
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
+import '../mess_menu_data.dart';// Make sure this path is correct for your project structure
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -31,6 +32,10 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch today's menu dynamically
+    final int currentWeekday = DateTime.now().weekday;
+    final Map<String, List<String>> todaysMenu = MessMenuData.weeklyMenu[currentWeekday] ?? {};
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -147,7 +152,7 @@ class Dashboard extends StatelessWidget {
               const Text("What is in Today's Food? 🍽️", style: sectionTitle),
               const SizedBox(height: 12),
 
-              _buildMessCard(),
+              _buildMessCard(todaysMenu),
 
               const SizedBox(height: 20),
             ],
@@ -226,7 +231,12 @@ class Dashboard extends StatelessWidget {
   }
 
   /// 🔹 Mess Card
-  Widget _buildMessCard() {
+  Widget _buildMessCard(Map<String, List<String>> menu) {
+    // Join the list of items into a single comma-separated string for display
+    final String breakfast = menu['Breakfast']?.join(', ') ?? 'Not available';
+    final String lunch = menu['Lunch']?.join(', ') ?? 'Not available';
+    final String dinner = menu['Dinner']?.join(', ') ?? 'Not available';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: _cardDecoration(),
@@ -246,7 +256,7 @@ class Dashboard extends StatelessWidget {
 
           _buildMealItem(
             title: "BREAKFAST",
-            food: "Pancakes & Coffee",
+            food: breakfast,
             time: "08:00 AM - 10:00 AM",
             color: Colors.blue,
           ),
@@ -255,7 +265,7 @@ class Dashboard extends StatelessWidget {
 
           _buildMealItem(
             title: "LUNCH",
-            food: "Vegetable Biryani",
+            food: lunch,
             time: "12:30 PM - 02:30 PM",
             color: Colors.green,
           ),
@@ -264,8 +274,8 @@ class Dashboard extends StatelessWidget {
 
           _buildMealItem(
             title: "DINNER",
-            food: "Paneer Butter Masala",
-            time: "08:00 PM - 10:00 PM",
+            food: dinner,
+            time: "07:30 PM - 09:30 PM",
             color: Colors.orange,
           ),
         ],
@@ -302,7 +312,13 @@ class Dashboard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   )),
               const SizedBox(height: 4),
-              Text(food, style: cardTitle),
+              // We ensure this Text widget handles overflow gracefully
+              Text(
+                food,
+                style: cardTitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 4),
               Text(time, style: subtitle),
             ],
@@ -312,4 +328,3 @@ class Dashboard extends StatelessWidget {
     );
   }
 }
-

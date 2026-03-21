@@ -2,15 +2,52 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_theme.dart';
+import 'mess_menu_data.dart';
 
-class MessMenuScreen extends StatelessWidget {
+class MessMenuScreen extends StatefulWidget {
   const MessMenuScreen({super.key});
 
   @override
+  State<MessMenuScreen> createState() => _MessMenuScreenState();
+}
+
+class _MessMenuScreenState extends State<MessMenuScreen> {
+  late DateTime _currentDate;
+  late int _currentWeekday;
+
+  bool _isTodayTab = true;
+  late int _selectedWeeklyDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentDate = DateTime.now();
+    _currentWeekday = _currentDate.weekday;
+    _selectedWeeklyDay = _currentWeekday;
+  }
+
+  String _getFormattedDate() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    String dayName = MessMenuData.weekdays[_currentDate.weekday - 1];
+    String monthName = months[_currentDate.month - 1];
+
+    String suffix = 'th';
+    if (_currentDate.day % 10 == 1 && _currentDate.day != 11) suffix = 'st';
+    if (_currentDate.day % 10 == 2 && _currentDate.day != 12) suffix = 'nd';
+    if (_currentDate.day % 10 == 3 && _currentDate.day != 13) suffix = 'rd';
+
+    return '$dayName, ${_currentDate.day}$suffix $monthName';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    int activeDay = _isTodayTab ? _currentWeekday : _selectedWeeklyDay;
+    final displayMenu = MessMenuData.weeklyMenu[activeDay] ?? {};
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
+      backgroundColor: AppColors.background,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(72),
         child: ClipRRect(
@@ -23,11 +60,7 @@ class MessMenuScreen extends StatelessWidget {
               titleSpacing: 24,
               title: Row(
                 children: [
-                  const Icon(
-                    Icons.restaurant,
-                    color: AppColors.primaryContainer,
-                    size: 28,
-                  ),
+                  const Icon(Icons.restaurant, color: AppColors.primaryContainer, size: 28),
                   const SizedBox(width: 12),
                   Text(
                     'Mess Menu',
@@ -40,19 +73,6 @@ class MessMenuScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.notifications_none, color: AppColors.onSurface),
-                    onPressed: () {},
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      hoverColor: AppColors.surfaceContainerHigh,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -62,10 +82,9 @@ class MessMenuScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tabs Section
             Container(
               padding: const EdgeInsets.all(4),
-              margin: const EdgeInsets.only(bottom: 32),
+              margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(32),
@@ -73,26 +92,26 @@ class MessMenuScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 2,
-                            offset: const Offset(0, 1),
-                          )
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Today',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                    child: InkWell(
+                      onTap: () => setState(() => _isTodayTab = true),
+                      borderRadius: BorderRadius.circular(28),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _isTodayTab ? AppColors.surfaceContainerLowest : Colors.transparent,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: _isTodayTab ? [
+                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1))
+                          ] : [],
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Today',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: _isTodayTab ? FontWeight.w600 : FontWeight.w500,
+                              color: _isTodayTab ? AppColors.primary : AppColors.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ),
@@ -100,17 +119,24 @@ class MessMenuScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () => setState(() => _isTodayTab = false),
                       borderRadius: BorderRadius.circular(28),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: !_isTodayTab ? AppColors.surfaceContainerLowest : Colors.transparent,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: !_isTodayTab ? [
+                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1))
+                          ] : [],
+                        ),
                         child: Center(
                           child: Text(
                             'Weekly',
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onSurfaceVariant,
+                              fontWeight: !_isTodayTab ? FontWeight.w600 : FontWeight.w500,
+                              color: !_isTodayTab ? AppColors.primary : AppColors.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -121,9 +147,42 @@ class MessMenuScreen extends StatelessWidget {
               ),
             ),
 
-            // Today's Date Heading
+            if (!_isTodayTab) ...[
+              SizedBox(
+                height: 40,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 7,
+                  itemBuilder: (context, index) {
+                    int dayInt = index + 1;
+                    bool isSelected = dayInt == _selectedWeeklyDay;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ChoiceChip(
+                        label: Text(
+                          MessMenuData.weekdays[index].substring(0, 3),
+                          style: GoogleFonts.inter(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: isSelected ? Colors.white : AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        selected: isSelected,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surfaceContainerLowest,
+                        showCheckmark: false,
+                        onSelected: (selected) {
+                          if (selected) setState(() => _selectedWeeklyDay = dayInt);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             Text(
-              "Today's Selection",
+              _isTodayTab ? "Today's Selection" : "${MessMenuData.weekdays[_selectedWeeklyDay - 1]}'s Menu",
               style: GoogleFonts.manrope(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
@@ -133,7 +192,7 @@ class MessMenuScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Monday, 24th October',
+              _isTodayTab ? _getFormattedDate() : 'Weekly Overview',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -142,120 +201,135 @@ class MessMenuScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Menu Cards
-            _buildMealCard(
-              title: 'Breakfast',
-              time: '08:00 AM - 10:00 AM',
-              icon: Icons.coffee,
-              themeColor: AppColors.secondary,
-              bgColor: AppColors.secondaryContainer.withOpacity(0.3),
-              items: ['Scrambled Eggs, Toast', 'Fresh Fruit', 'Brewed Coffee'],
-            ),
-            const SizedBox(height: 24),
-            _buildMealCard(
-              title: 'Lunch',
-              time: '12:30 PM - 02:30 PM',
-              icon: Icons.restaurant_menu,
-              themeColor: AppColors.primary,
-              bgColor: AppColors.primaryFixed.withOpacity(0.3),
-              items: ['Vegetable Biryani, Raita', 'Garden Fresh Salad', 'Gulab Jamun'],
-            ),
-            const SizedBox(height: 24),
-            _buildMealCard(
-              title: 'Dinner',
-              time: '07:30 PM - 09:30 PM',
-              icon: Icons.dinner_dining, // Skillet alternative
-              themeColor: AppColors.tertiary,
-              bgColor: AppColors.tertiaryFixed.withOpacity(0.3),
-              items: ['Paneer Butter Masala', 'Garlic Naan & Steamed Rice', 'Vanilla Ice Cream'],
-            ),
-
-            // Rating Section
-            const SizedBox(height: 48),
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(24),
+            if (displayMenu.containsKey('Breakfast'))
+              _buildMealCard(
+                title: 'Breakfast',
+                time: '08:00 AM - 10:00 AM',
+                icon: Icons.coffee,
+                themeColor: AppColors.secondary,
+                bgColor: AppColors.secondaryContainer.withOpacity(0.3),
+                items: displayMenu['Breakfast']!,
               ),
-              child: Column(
-                children: [
-                  Text(
-                    "Rate today's food",
-                    style: GoogleFonts.manrope(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'How was your experience?',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildStar(isFilled: true),
-                      const SizedBox(width: 8),
-                      _buildStar(isFilled: true),
-                      const SizedBox(width: 8),
-                      _buildStar(isFilled: true),
-                      const SizedBox(width: 8),
-                      _buildStar(isFilled: true),
-                      const SizedBox(width: 8),
-                      _buildStar(isFilled: false),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryContainer],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+            const SizedBox(height: 24),
+
+            if (displayMenu.containsKey('Lunch'))
+              _buildMealCard(
+                title: 'Lunch',
+                time: '12:30 PM - 02:30 PM',
+                icon: Icons.restaurant_menu,
+                themeColor: AppColors.primary,
+                bgColor: AppColors.primaryFixed.withOpacity(0.3),
+                items: displayMenu['Lunch']!,
+              ),
+            const SizedBox(height: 24),
+
+            if (displayMenu.containsKey('Snacks'))
+              _buildMealCard(
+                title: 'Snacks',
+                time: '05:00 PM - 06:00 PM',
+                icon: Icons.bakery_dining,
+                themeColor: Colors.orange,
+                bgColor: Colors.orange.withOpacity(0.15),
+                items: displayMenu['Snacks']!,
+              ),
+            const SizedBox(height: 24),
+
+            if (displayMenu.containsKey('Dinner'))
+              _buildMealCard(
+                title: 'Dinner',
+                time: '07:30 PM - 09:30 PM',
+                icon: Icons.dinner_dining,
+                themeColor: AppColors.tertiary,
+                bgColor: AppColors.tertiaryFixed.withOpacity(0.3),
+                items: displayMenu['Dinner']!,
+              ),
+
+            if (_isTodayTab) ...[
+              const SizedBox(height: 48),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Rate today's food",
+                      style: GoogleFonts.manrope(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSurface,
                       ),
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'How was your experience?',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildStar(isFilled: true),
+                        const SizedBox(width: 8),
+                        _buildStar(isFilled: true),
+                        const SizedBox(width: 8),
+                        _buildStar(isFilled: true),
+                        const SizedBox(width: 8),
+                        _buildStar(isFilled: true),
+                        const SizedBox(width: 8),
+                        _buildStar(isFilled: false),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26),
+                    const SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryContainer],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(26),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        'Submit Feedback',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(26),
+                          ),
+                        ),
+                        child: Text(
+                          'Submit Feedback',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ]
           ],
         ),
       ),
-
     );
   }
 
@@ -324,7 +398,6 @@ class MessMenuScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                Icon(Icons.more_horiz, color: AppColors.outlineVariant),
               ],
             ),
             const SizedBox(height: 16),
@@ -341,12 +414,14 @@ class MessMenuScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    item,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.onSurfaceVariant,
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -365,5 +440,4 @@ class MessMenuScreen extends StatelessWidget {
       color: isFilled ? AppColors.primary : AppColors.outlineVariant,
     );
   }
-
 }
