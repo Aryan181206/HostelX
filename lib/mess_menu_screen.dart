@@ -468,14 +468,14 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC), // light background like card
+              color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Title
+
                 const Text(
                   "Feedback",
                   style: TextStyle(
@@ -487,7 +487,7 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
                 const SizedBox(height: 12),
 
-                /// Rating Display
+
                 Row(
                   children: [
                     Icon(Icons.star, color: Colors.orange.shade400, size: 20),
@@ -504,7 +504,7 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
                 const SizedBox(height: 16),
 
-                /// TextField
+
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -526,11 +526,11 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
                 const SizedBox(height: 20),
 
-                /// Buttons
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    /// Cancel
+
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
@@ -544,10 +544,10 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
                     const SizedBox(width: 10),
 
-                    /// Save Button
+
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB), // blue accent
+                        backgroundColor: const Color(0xFF2563EB),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -577,8 +577,8 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
                           SnackBar(
                             content: Text(
                               success
-                                  ? "Feedback submitted successfully ✅"
-                                  : "Failed to submit feedback ❌",
+                                  ? "Feedback submitted successfully"
+                                  : "Failed to submit feedback ",
                             ),
                           ),
                         );

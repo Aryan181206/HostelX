@@ -40,16 +40,15 @@ class _NewComplaintBottomSheetState
 
   final ImagePicker _picker = ImagePicker();
 
-  /// ✅ CLOUDINARY CONFIG (IMPORTANT)
   static const String _cloudName = 'doturqykw';
-  static const String _uploadPreset = 'hostelx'; // 👈 SAME AS WORKING CODE
+  static const String _uploadPreset = 'hostelx';
 
-  /// 🔥 PICK IMAGE (COMPRESSED)
+
   Future<void> _pickImage() async {
     try {
       final picked = await _picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 70, // 🔥 important (fix upload fail)
+        imageQuality: 70,
         maxWidth: 1200,
       );
 
@@ -65,7 +64,7 @@ class _NewComplaintBottomSheetState
     }
   }
 
-  /// 🔥 CLOUDINARY UPLOAD (PROPER VERSION)
+
   Future<String> _uploadImageToCloudinary(File imageFile) async {
     final uri = Uri.parse(
       'https://api.cloudinary.com/v1_1/$_cloudName/image/upload',
@@ -90,7 +89,7 @@ class _NewComplaintBottomSheetState
     return data['secure_url'];
   }
 
-  /// 🔥 SUBMIT
+
   Future<void> _submitComplaint() async {
     if (_selectedCategory == null ||
         _descriptionController.text.trim().isEmpty) {
@@ -103,7 +102,7 @@ class _NewComplaintBottomSheetState
     setState(() => _isLoading = true);
 
     try {
-      /// 👉 Upload image first
+
       if (_selectedImage != null) {
         imageUrl = await _uploadImageToCloudinary(_selectedImage!);
       }
@@ -149,7 +148,7 @@ class _NewComplaintBottomSheetState
         mainAxisSize: MainAxisSize.min,
         children: [
 
-          /// Drag Handle
+
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -162,7 +161,7 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          /// Header
+
           Container(
             padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
             decoration: BoxDecoration(
@@ -194,7 +193,7 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          /// FORM (UNCHANGED UI)
+
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
@@ -285,7 +284,7 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          /// Submit Button
+
           Container(
             padding: const EdgeInsets.all(20),
             child: SizedBox(

@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../admin/admin_login_screen.dart';
 import '../api/user_sheet_api.dart';
-// import 'admin_login_screen.dart'; // Make sure to import your Admin screen here
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,17 +23,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
 
-  // Controllers
+
   final TextEditingController _rollController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // UI State
+
   bool _isLoading = false;
   bool _passwordVisible = false;
   String? _errorMessage;
 
-  // Colors
+
   static const Color indigoStart = Color(0xFF3F51B5);
   static const Color indigoEnd = Color(0xFF24389C);
   static const Color tealStart = Color(0xFF00BFA6);
@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus(); // 🔥 auto login check
+    _checkLoginStatus();
   }
 
   Future<void> _checkLoginStatus() async {
@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (userData != null) {
       debugPrint("User already logged in");
 
-      // Delay to avoid context issues
+
       Future.microtask(() {
         Navigator.pushReplacement(
           context,
@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient
+
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Decorative circle 1
+
           Positioned(
             top: -100,
             left: -40,
@@ -163,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Decorative circle 2
+
           Positioned(
             bottom: -50,
             right: -30,
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Main content
+
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -217,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 48),
 
-                      // Login Card
+
                       Container(
                         width: double.infinity,
                         constraints: const BoxConstraints(maxWidth: 450),
@@ -407,12 +407,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Text to enter as admin
+
                             Center(
                               child: TextButton(
                                 onPressed: () {
-                                  // Navigate to Admin Login Screen
-                                  // Replace AdminLoginScreen() with your actual admin login widget
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

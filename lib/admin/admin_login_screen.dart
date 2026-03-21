@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Ensure these paths match your project structure
+
 import '../app_theme.dart';
 import 'admin_dashboard.dart';
 
@@ -16,11 +16,11 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   bool _obscurePassword = true;
 
-  // Controllers for text fields
+
   final adminEmailController = TextEditingController();
   final adminPasswordController = TextEditingController();
 
-  // Hardcoded credentials as per your requirement
+
   final String adminEmailKey = "admin@iitism.ac.in";
   final String adminPasswordKey = "adminiitamber";
 
@@ -31,19 +31,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     super.dispose();
   }
 
-  // Extracted Login Logic
+
   void _handleLogin() {
     final email = adminEmailController.text.trim();
     final password = adminPasswordController.text.trim();
 
     if (email == adminEmailKey && password == adminPasswordKey) {
-      // Use pushReplacement so user can't "Go Back" to login screen after success
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
       );
     } else {
-      // Show error feedback
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Invalid Credentials. Please try again.'),
@@ -61,7 +61,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Background Mesh Effect
+
           Positioned(
             top: -150,
             left: -150,
@@ -93,7 +93,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             ),
           ),
 
-          // Main Content
+
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -118,7 +118,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ),
                       child: Column(
                         children: [
-                          // Header
+
                           Padding(
                             padding: const EdgeInsets.all(40),
                             child: Column(
@@ -155,7 +155,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             ),
                           ),
 
-                          // Form
+
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 40),
                             child: Column(
@@ -185,7 +185,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                // Email
+
                                 _buildTextField(
                                   controller: adminEmailController,
                                   hintText: 'Enter admin email',
@@ -194,7 +194,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                 ),
                                 const SizedBox(height: 16),
 
-                                // Password
+
                                 _buildTextField(
                                   controller: adminPasswordController,
                                   hintText: 'Enter password',
@@ -209,7 +209,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                 ),
                                 const SizedBox(height: 32),
 
-                                // Login Button
+
                                 Container(
                                   width: double.infinity,
                                   height: 56,
@@ -229,7 +229,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: _handleLogin, // Fixed Navigation Logic
+                                    onPressed: _handleLogin,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
@@ -257,7 +257,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             ),
                           ),
 
-                          // Footer Indicator
+
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),

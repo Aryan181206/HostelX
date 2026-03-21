@@ -35,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Color(0xFF4338CA)), // Indigo-600
                   onPressed: () {
-                    // Navigator.pop(context);
+
                   },
                 ),
               ),
@@ -49,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               actions: const [
-                // Spacer for centering title exactly as in HTML
+
                 SizedBox(width: 48),
               ],
             ),
@@ -61,11 +61,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Profile Header
+
             _buildProfileHeader(),
             const SizedBox(height: 40),
 
-            // Preferences Group
+
             _buildSectionHeading('PREFERENCES'),
             const SizedBox(height: 8),
             Container(
@@ -114,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Application Group
+
             _buildSectionHeading('APPLICATION'),
             const SizedBox(height: 8),
             Container(
@@ -152,7 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            // Logout Button
+
             const SizedBox(height: 32),
             Material(
               color: AppColors.surfaceContainerHigh,

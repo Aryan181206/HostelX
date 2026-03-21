@@ -138,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // New Password
+
                 TextFormField(
                   controller: newPasswordController,
                   obscureText: true,
@@ -161,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Confirm Password
+
                 TextFormField(
                   controller: confirmPasswordController,
                   obscureText: true,
@@ -184,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Save Button
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -278,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)), // Indigo-600 equivalent
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)),
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -289,12 +289,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF4338CA), // Indigo-700
+                  color: const Color(0xFF4338CA),
                   letterSpacing: -0.5,
                 ),
               ),
               actions: const [
-                // Spacer for centering title exactly as in HTML
+
                 SizedBox(width: 48),
               ],
             ),
@@ -305,11 +305,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.only(top: 100, left: 24, right: 24, bottom: 120),
         child: Column(
           children: [
-            // Profile Header Section
+
             _buildProfileHeader(),
             const SizedBox(height: 40),
 
-            // Options List (Unified Fintech-style Card)
+
             Container(
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
@@ -327,8 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildOptionItem(
                     icon: Icons.person_outline,
                     title: 'Edit Password',
-                    iconBgColor: const Color(0xFFEEF2FF), // indigo-50
-                    iconColor: const Color(0xFF4F46E5),   // indigo-600
+                    iconBgColor: const Color(0xFFEEF2FF),
+                    iconColor: const Color(0xFF4F46E5),
                     onTap: () {
                       _showEditPasswordSheet();
                     },
@@ -337,7 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildOptionItem(
                     icon: Icons.settings_outlined,
                     title: 'Roommate Details',
-                    iconBgColor: const Color(0xFFF1F5F9), // slate-100
+                    iconBgColor: const Color(0xFFF1F5F9),
                     iconColor: AppColors.onSurfaceVariant,
                     onTap: () async {
 
@@ -371,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Stack(
           alignment: Alignment.bottomRight,
           children: [
-            // Avatar Background
+
             Container(
               width: 128,
               height: 128,
@@ -391,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
               ),
             ),
-            // Verified Badge
+
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(

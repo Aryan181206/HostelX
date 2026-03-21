@@ -42,7 +42,7 @@ class _ReportItemBottomSheetState extends State<ReportItemBottomSheet> {
   final ImagePicker _picker = ImagePicker();
 
 
-  // Replace with your Cloudinary details
+
   static const String _cloudName = 'doturqykw';
   static const String _uploadPreset = 'hostelx';
 

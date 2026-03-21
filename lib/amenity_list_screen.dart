@@ -16,7 +16,7 @@ class AmenitiesListScreen extends StatefulWidget {
 
 class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
   String _searchQuery = '';
-  String _selectedFilter = 'All'; // 'All', 'Available', 'Booked'
+  String _selectedFilter = 'All';
 
   String? currentUserId;
   bool _isLoadingUser = true;
@@ -63,7 +63,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Search Bar ---
+
             TextField(
               onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
               decoration: InputDecoration(
@@ -85,7 +85,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
             ),
             const SizedBox(height: 16),
 
-            // --- Filters ---
+
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -111,7 +111,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
             ),
             const SizedBox(height: 16),
 
-            // --- Dynamic Amenities List ---
+
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('amenities').snapshots(),
               builder: (context, snapshot) {
@@ -152,7 +152,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
 
             const SizedBox(height: 32),
 
-            // --- My Bookings Section ---
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -176,10 +176,10 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
             ),
             const SizedBox(height: 16),
 
-            // --- Dynamic Bookings List ---
+
             if (currentUserId != null)
               StreamBuilder<QuerySnapshot>(
-                // Filter where 'uid' matches the shared preferences roll number
+
                 stream: FirebaseFirestore.instance
                     .collection('bookings')
                     .where('uid', isEqualTo: currentUserId)
@@ -324,7 +324,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
                         builder: (context) => BookAmenityDetailScreen(
                           amenityData: data,
                           amenityId: id,
-                          currentUid: currentUserId ?? 'unknown_user', // Pass UID here
+                          currentUid: currentUserId ?? 'unknown_user',
                         ),
                       ),
                     );

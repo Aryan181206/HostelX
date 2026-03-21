@@ -24,12 +24,12 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     fetchComplaints();
   }
 
-  // ✅ REFRESH FUNCTION
+
   Future<void> _refreshComplaints() async {
     await fetchComplaints();
   }
 
-  // ✅ LOGIC: Fetch data from sheets
+
   Future<void> fetchComplaints() async {
     final data = await UserSheetsApi.getMyComplaints();
 
@@ -117,7 +117,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Show Loading state while fetching initial data
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -259,7 +259,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                 ),
               ),
 
-              // View Archive Button
+
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
@@ -281,7 +281,6 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     );
   }
 
-  // 🔹 BOTTOM SHEETS
   void _showAllActiveComplaints(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -431,7 +430,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
         ),
         child: Stack(
           children: [
-            // Abstract Glow Effect
+
             Positioned(
               right: -40,
               top: -40,

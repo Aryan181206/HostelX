@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Import your tab screens here
+
 import '../complaints/complaints_screen.dart';
 import '../lost_and_found/lost_and_found_screen.dart';
-import '../mess_menu_screen.dart';
-import '../notice.dart';
+
+
 import '../profile/profile.dart';
-import '../setting.dart';
+
 
 
 class HomeWrapper extends StatefulWidget {
@@ -44,10 +44,10 @@ class _HomeWrapperState extends State<HomeWrapper> {
   }
 
   final List<Widget> _screens = const [
-    Dashboard(),      // 0
-    LostAndFoundScreen(),     // 1
-    ComplaintsScreen(),   // 2
-    AmenitiesListScreen(),     // 3
+    Dashboard(),
+    LostAndFoundScreen(),
+    ComplaintsScreen(),
+    AmenitiesListScreen(),
   ];
 
   @override
@@ -65,7 +65,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
 
             GestureDetector(
               onTap: () {
-                // navigate to profile
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -93,7 +93,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
               ),
             ),
             const SizedBox(width: 15),
-            // Greeting & Room Info
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

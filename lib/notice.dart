@@ -26,7 +26,7 @@ class NoticesScreen extends StatelessWidget {
 
           final announcements = snapshot.data!;
 
-          // 🔥 Sort latest first
+
           announcements.sort((a, b) =>
               b['date']!.compareTo(a['date']!));
 
@@ -39,7 +39,7 @@ class NoticesScreen extends StatelessWidget {
                 _buildSectionLabel('📢 ANNOUNCEMENTS'),
                 const SizedBox(height: 16),
 
-                /// 🔹 ALL ANNOUNCEMENTS
+
                 ...announcements.map((item) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -60,7 +60,7 @@ class NoticesScreen extends StatelessWidget {
     );
   }
 
-  /// 🔹 Format Date (Fix for 46102 issue)
+
   String _formatDate(String rawDate) {
     try {
       if (double.tryParse(rawDate) != null) {
@@ -77,7 +77,7 @@ class NoticesScreen extends StatelessWidget {
     }
   }
 
-  /// 🔹 Dynamic Color Based on Header
+
   Color _getCategoryColor(String? header) {
     switch (header?.toLowerCase()) {
       case 'food':
@@ -108,7 +108,7 @@ class NoticesScreen extends StatelessWidget {
     );
   }
 
-  /// 🔹 SINGLE NOTICE CARD (Same UI as before)
+
   Widget _buildNoticeCard({
     required String category,
     required String date,
@@ -132,7 +132,7 @@ class NoticesScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// 🔹 Top Row
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -158,7 +158,7 @@ class NoticesScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// 🔹 Title
+
           Text(
             title,
             style: GoogleFonts.manrope(
@@ -170,7 +170,7 @@ class NoticesScreen extends StatelessWidget {
 
           const SizedBox(height: 4),
 
-          /// 🔹 Description
+
           Text(
             description,
             maxLines: 2,

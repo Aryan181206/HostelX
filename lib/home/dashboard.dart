@@ -8,15 +8,15 @@ import 'package:intl/intl.dart';
 
 import '../api/user_sheet_api.dart';
 import '../app_theme.dart';
-import '../mess_menu_data.dart';// Make sure this path is correct for your project structure
+import '../mess_menu_data.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
 
-  // 🔹 Common Spacing
+
   static const double spacing = 16;
 
-  // 🔹 Common Text Styles
+
   static const TextStyle sectionTitle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
@@ -34,7 +34,7 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fetch today's menu dynamically
+
     final int currentWeekday = DateTime.now().weekday;
     final Map<String, List<String>> todaysMenu = MessMenuData.weeklyMenu[currentWeekday] ?? {};
 
@@ -46,11 +46,11 @@ class Dashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// 🔹 Quick Actions
+
               const Text("Quick Actions", style: sectionTitle),
               const SizedBox(height: 12),
 
-              // First Row of Actions
+
               Row(
                 children: [
                   Expanded(
@@ -81,7 +81,7 @@ class Dashboard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Second Row of Actions
+
               Row(
                 children: [
                   Expanded(
@@ -114,7 +114,7 @@ class Dashboard extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              /// 🔹 Notice Board Header
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -135,7 +135,7 @@ class Dashboard extends StatelessWidget {
                 ],
               ),
 
-              /// 🔹 Notice Board Container
+
               FutureBuilder<List<Map<String, String>>>(
                 future: UserSheetsApi.getAnnouncements(),
                 builder: (context, snapshot) {
@@ -157,7 +157,7 @@ class Dashboard extends StatelessWidget {
 
                   final announcements = snapshot.data!;
 
-                  // 🔥 Sort latest first
+
                   announcements.sort((a, b) => b['date']!.compareTo(a['date']!));
 
                   return Container(
@@ -167,21 +167,21 @@ class Dashboard extends StatelessWidget {
                       children: List.generate(announcements.length > 2 ? 2 : announcements.length, (index) {
                         final item = announcements[index];
 
-                        // 🔹 Format date
+
                         String formatDate(String rawDate) {
                           try {
-                            // 🔹 If it's a number (Google Sheets serial date)
+
                             if (double.tryParse(rawDate) != null) {
                               int days = int.parse(rawDate);
                               DateTime date = DateTime(1899, 12, 30).add(Duration(days: days));
                               return DateFormat('dd MMM yyyy').format(date);
                             }
 
-                            // 🔹 If it's normal date string
+
                             return DateFormat('dd MMM yyyy')
                                 .format(DateTime.parse(rawDate));
                           } catch (e) {
-                            return rawDate; // fallback
+                            return rawDate;
                           }
                         }
                         String formattedDate = formatDate(item['date']!);
@@ -210,7 +210,7 @@ class Dashboard extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              /// 🔹 Mess Section
+
               const Text("What is in Today's Food? 🍽️", style: sectionTitle),
               const SizedBox(height: 12),
 
@@ -224,7 +224,7 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  /// 🔹 Common Card Decoration
+
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
@@ -239,7 +239,7 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  /// 🔹 Quick Action Card (Updated with Navigation)
+
   Widget _buildActionCard({
     required BuildContext context,
     required IconData icon,
@@ -289,7 +289,7 @@ class Dashboard extends StatelessWidget {
     }
   }
 
-  /// 🔹 Announcement Row (Enhanced UI with Header + Date)
+
   Widget _buildAnnouncementRow({
     required String header,
     required String announcement,
@@ -307,7 +307,7 @@ class Dashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// 🔹 Header (Title)
+
               Text(
                 header.isNotEmpty ? header : "Announcement",
                 style: const TextStyle(
@@ -318,7 +318,7 @@ class Dashboard extends StatelessWidget {
 
               const SizedBox(height: 4),
 
-              /// 🔹 Description
+
               Text(
                 announcement,
                 style: const TextStyle(
@@ -329,7 +329,7 @@ class Dashboard extends StatelessWidget {
 
               const SizedBox(height: 6),
 
-              /// 🔹 Date
+
               Row(
                 children: [
                   const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
@@ -350,7 +350,7 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  /// 🔹 Mess Card
+
   Widget _buildMessCard(Map<String, List<String>> menu) {
     // Join the list of items into a single comma-separated string for display
     final String breakfast = menu['Breakfast']?.join(', ') ?? 'Not available';
@@ -363,7 +363,7 @@ class Dashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Header
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
@@ -403,7 +403,7 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  /// 🔹 Meal Item
+
   Widget _buildMealItem({
     required String title,
     required String food,
@@ -432,7 +432,6 @@ class Dashboard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   )),
               const SizedBox(height: 4),
-              // We ensure this Text widget handles overflow gracefully
               Text(
                 food,
                 style: cardTitle,

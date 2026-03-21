@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Primary
+
   static const Color primary = Color(0xFF24389C);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color primaryContainer = Color(0xFF3F51B5);
@@ -13,7 +13,7 @@ class AppColors {
   static const Color onPrimaryFixedVariant = Color(0xFF293CA0);
   static const Color inversePrimary = Color(0xFFBAC3FF);
 
-  // Secondary
+
   static const Color secondary = Color(0xFF006B5C);
   static const Color onSecondary = Color(0xFFFFFFFF);
   static const Color secondaryContainer = Color(0xFF68FADE);
@@ -23,7 +23,6 @@ class AppColors {
   static const Color onSecondaryFixed = Color(0xFF00201B);
   static const Color onSecondaryFixedVariant = Color(0xFF005045);
 
-  // Tertiary
   static const Color tertiary = Color(0xFF5E3C00);
   static const Color onTertiary = Color(0xFFFFFFFF);
   static const Color tertiaryContainer = Color(0xFF7D5100);
@@ -33,13 +32,13 @@ class AppColors {
   static const Color onTertiaryFixed = Color(0xFF291800);
   static const Color onTertiaryFixedVariant = Color(0xFF633F00);
 
-  // Error
+
   static const Color error = Color(0xFFBA1A1A);
   static const Color onError = Color(0xFFFFFFFF);
   static const Color errorContainer = Color(0xFFFFDAD6);
   static const Color onErrorContainer = Color(0xFF93000A);
 
-  // Surfaces & Backgrounds
+
   static const Color background = Color(0xFFF7F9FC);
   static const Color onBackground = Color(0xFF191C1E);
   static const Color surface = Color(0xFFF7F9FC);
@@ -49,7 +48,7 @@ class AppColors {
   static const Color inverseSurface = Color(0xFF2D3133);
   static const Color inverseOnSurface = Color(0xFFEFF1F4);
 
-  // Surface Containers
+
   static const Color surfaceBright = Color(0xFFF7F9FC);
   static const Color surfaceDim = Color(0xFFD8DADD);
   static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
@@ -59,7 +58,7 @@ class AppColors {
   static const Color surfaceContainerHighest = Color(0xFFE0E3E6);
   static const Color surfaceTint = Color(0xFF4355B9);
 
-  // Outlines
+
   static const Color outline = Color(0xFF757684);
   static const Color outlineVariant = Color(0xFFC5C5D4);
 }
@@ -101,7 +100,7 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.surface,
       textTheme: TextTheme(
-        // Mapping your Tailwind fonts (Headline: Manrope, Body/Label: Inter)
+
         displayLarge: GoogleFonts.manrope(color: AppColors.onSurface),
         displayMedium: GoogleFonts.manrope(color: AppColors.onSurface),
         displaySmall: GoogleFonts.manrope(color: AppColors.onSurface),

@@ -50,8 +50,8 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
 
     try {
       await FirebaseFirestore.instance.collection('bookings').add({
-        'uid': widget.currentUid, // Saving the admission/roll number explicitly as requested!
-        'userId': widget.currentUid, // (Optional fallback key for ease of use)
+        'uid': widget.currentUid,
+        'userId': widget.currentUid,
         'amenityId': widget.amenityId,
         'amenityTitle': widget.amenityData['title'],
         'time': 'Date: ${_dates[_selectedDateIndex]} • ${_timeSlots[_selectedTimeIndex]}',
@@ -73,9 +73,7 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
     }
   }
 
-  // ... The rest of the BookAmenityDetailScreen methods remain exactly the same
-  // as the previous response (_buildHeroSection, _buildDescription, _buildDateSelector,
-  // _buildTimeSlots, _buildDurationSelector, _buildBottomActionBar, etc.)
+
 
   @override
   Widget build(BuildContext context) {

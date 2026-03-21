@@ -81,7 +81,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            _buildSearchBar(), // Updated method
+            _buildSearchBar(),
             const SizedBox(height: 32),
             _buildTabs(),
             const SizedBox(height: 24),
@@ -92,12 +92,12 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     );
   }
 
-  // Renamed from _buildSearchAndFilters and removed the filter chips
+
   Widget _buildSearchBar() {
     return TextField(
       onChanged: (value) {
         setState(() {
-          _searchQuery = value.toLowerCase(); // Update query on text change
+          _searchQuery = value.toLowerCase();
         });
       },
       decoration: InputDecoration(
@@ -205,7 +205,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
 
         final docs = snapshot.data?.docs ?? [];
 
-        // Apply local search filtering to the documents returned from Firestore
+
         final filteredDocs = docs.where((doc) {
           final data = doc.data();
           final title = (data['title'] ?? '').toString().toLowerCase();
@@ -247,8 +247,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               avatarUrl: data['avatarUrl'] ?? '',
               location: data['location'] ?? '',
               date: data['date'] ?? '',
-              phone: data['phone'] ?? 'N/A', // Fetched phone
-              room: data['room'] ?? 'N/A', // Fetched room
+              phone: data['phone'] ?? 'N/A',
+              room: data['room'] ?? 'N/A',
               status: data['status'] ?? '',
               isUrgent: data['isUrgent'] ?? false,
             );

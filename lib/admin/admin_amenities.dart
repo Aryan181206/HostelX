@@ -96,7 +96,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // 4. Reset Form
+
       setState(() {
         _nameController.clear();
         _descController.clear();

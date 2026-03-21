@@ -11,7 +11,7 @@ class AdminMessFeedbackScreen extends StatefulWidget {
 }
 
 class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
-  // Filter state: 'All', 'High Rating', 'Low Rating'
+
   String _selectedFilter = 'All';
 
   double _averageRating = 0.0;
@@ -80,12 +80,12 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
           final rawList = snapshot.data ?? [];
           _calculateStats(rawList);
 
-          // --- FILTER LOGIC ---
+
           List<Map<String, String>> filteredList = rawList.where((item) {
             double r = double.tryParse(item['rating'] ?? '0') ?? 0;
             if (_selectedFilter == 'High Rating') return r > 3.0;
             if (_selectedFilter == 'Low Rating') return r <= 2.0;
-            return true; // For 'All'
+            return true;
           }).toList();
 
           return SingleChildScrollView(
@@ -93,7 +93,7 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Summary Cards
+
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -128,7 +128,7 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Working Filters Section
+
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -144,7 +144,7 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Feedback List
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: filteredList.isEmpty
@@ -195,7 +195,6 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
     );
   }
 
-  // Updated Filter Chip with GestureDetector
   Widget _buildFilterChip(String label) {
     bool isActive = _selectedFilter == label;
     return GestureDetector(
@@ -218,7 +217,7 @@ class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
     );
   }
 
-  // --- UI Components (Same as your request) ---
+
   Widget _buildSummaryCard({required String title, required String value, required IconData icon, required Color iconColor, required Color iconBgColor}) {
     return Container(
       width: 180, padding: const EdgeInsets.all(20),

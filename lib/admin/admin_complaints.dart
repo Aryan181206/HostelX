@@ -40,7 +40,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
     }
   }
 
-  // --- Logic to handle Status Updates ---
+
   Future<void> _updateStatus(Map<String, String> complaint, String newStatus) async {
     showDialog(
       context: context,
@@ -80,7 +80,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
     }
   }
 
-  // Filtered list logic
+
   List<Map<String, String>> get _filteredComplaints {
     if (_selectedFilter == 'All') return _allComplaints;
     return _allComplaints
@@ -115,7 +115,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
     );
   }
 
-  // --- UI Sections ---
+
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -342,7 +342,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
     Color onThemeColor;
     IconData icon;
 
-    // Map status to theme colors and icons
+
     if (status == 'Resolved') {
       themeColor = AppColors.secondary;
       themeBgColor = AppColors.secondaryContainer.withOpacity(0.3);
@@ -360,7 +360,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
       icon = Icons.report_problem_outlined;
     }
 
-    // Dynamic Actions based on status
+
     List<Widget> actions = [];
     if (status == 'Resolved') {
       actions.add(
@@ -423,7 +423,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,7 +473,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Meta Info: Reporter & Time
+
             Row(
               children: [
                 Row(
@@ -509,7 +509,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Body: Text and Image
+
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -572,11 +572,11 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Divider
+
             const Divider(height: 1, color: AppColors.surfaceContainerHigh),
             const SizedBox(height: 16),
 
-            // Actions
+
             Row(children: actions),
           ],
         ),
@@ -584,7 +584,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
     );
   }
 
-  // Helper for action buttons
+
   Widget _buildActionButton(String label, Color textColor, VoidCallback onTap) {
     return Expanded(
       child: Material(
