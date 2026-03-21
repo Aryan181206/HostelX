@@ -1,24 +1,71 @@
+import 'dart:convert';
 import 'dart:ui';
-
-import 'package:amber_hackathon/book_amenity_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_theme.dart';
+import 'book_amenity_detail_screen.dart';
 
-class AmenitiesListScreen extends StatelessWidget {
+class AmenitiesListScreen extends StatefulWidget {
   const AmenitiesListScreen({super.key});
 
   @override
+  State<AmenitiesListScreen> createState() => _AmenitiesListScreenState();
+}
+
+class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
+  String _searchQuery = '';
+  String _selectedFilter = 'All'; // 'All', 'Available', 'Booked'
+
+  String? currentUserId;
+  bool _isLoadingUser = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserFromPrefs();
+  }
+
+  Future<void> _loadUserFromPrefs() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final userStr = prefs.getString('user');
+
+      if (userStr != null) {
+        final userData = jsonDecode(userStr);
+        setState(() {
+          currentUserId = userData['Admission No'] ?? 'unknown_user';
+          _isLoadingUser = false;
+        });
+      } else {
+        setState(() => _isLoadingUser = false);
+      }
+    } catch (e) {
+      debugPrint("Error loading user from prefs: $e");
+      setState(() => _isLoadingUser = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoadingUser) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.transparent, // Uses HomeWrapper's background
+      backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 120),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search Bar
+            // --- Search Bar ---
             TextField(
+              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
               decoration: InputDecoration(
                 hintText: 'Search for amenities...',
                 hintStyle: GoogleFonts.inter(color: AppColors.outline.withOpacity(0.6)),
@@ -38,24 +85,21 @@ class AmenitiesListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Filter Chips
+            // --- Filters ---
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('All', isActive: true),
+                  _buildFilterChip('All'),
                   const SizedBox(width: 8),
                   _buildFilterChip('Available'),
                   const SizedBox(width: 8),
                   _buildFilterChip('Booked'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Popular'),
                 ],
               ),
             ),
             const SizedBox(height: 32),
 
-            // Available Today
             Text(
               'Available Today',
               style: GoogleFonts.manrope(
@@ -67,30 +111,48 @@ class AmenitiesListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            _buildAmenityCard(
-              context,
-              title: 'Fitness Center',
-              subtitle: '4 slots available for the next hour',
-              imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
-              tagText: 'Available',
-              tagColor: AppColors.secondary,
-              tagBg: AppColors.secondaryContainer,
-              tagTextColor: AppColors.onSecondaryContainer,
+            // --- Dynamic Amenities List ---
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('amenities').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('No amenities found.');
+                }
+
+                var docs = snapshot.data!.docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final matchesSearch = data['title'].toString().toLowerCase().contains(_searchQuery);
+                  final matchesFilter = _selectedFilter == 'All' || data['status'] == _selectedFilter;
+                  return matchesSearch && matchesFilter;
+                }).toList();
+
+                if (docs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text('No amenities match your search or filter.'),
+                  );
+                }
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: docs.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final amenity = docs[index].data() as Map<String, dynamic>;
+                    final amenityId = docs[index].id;
+                    return _buildAmenityCard(context, amenity, amenityId);
+                  },
+                );
+              },
             ),
-            const SizedBox(height: 16),
-            _buildAmenityCard(
-              context,
-              title: 'Executive Laundry',
-              subtitle: 'Next slot: 4:30 PM (20 mins away)',
-              imageUrl: 'https://images.unsplash.com/photo-1517677129300-07b130802f46?q=80&w=800&auto=format&fit=crop',
-              tagText: 'Limited',
-              tagColor: AppColors.tertiaryFixed,
-              tagBg: AppColors.tertiaryContainer,
-              tagTextColor: AppColors.onTertiaryContainer,
-            ),
+
             const SizedBox(height: 32),
 
-            // My Bookings Section
+            // --- My Bookings Section ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -114,67 +176,73 @@ class AmenitiesListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Horizontal Bookings List
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
-              child: Row(
-                children: [
-                  _buildBookingCard(
-                    title: 'Private Cinema',
-                    time: 'Today • 7:00 PM - 9:00 PM',
-                    status: 'Confirmed',
-                    icon: Icons.event_available,
-                    bgColor: AppColors.primaryContainer,
-                    textColor: Colors.white,
-                  ),
-                  const SizedBox(width: 16),
-                  _buildBookingCard(
-                    title: 'Music Studio',
-                    time: 'Tomorrow • 10:00 AM',
-                    status: 'Scheduled',
-                    icon: Icons.local_library,
-                    bgColor: AppColors.surfaceContainerHigh,
-                    textColor: AppColors.onSurface,
-                    statusColor: AppColors.outline,
-                  ),
-                ],
-              ),
-            ),
+            // --- Dynamic Bookings List ---
+            if (currentUserId != null)
+              StreamBuilder<QuerySnapshot>(
+                // Filter where 'uid' matches the shared preferences roll number
+                stream: FirebaseFirestore.instance
+                    .collection('bookings')
+                    .where('uid', isEqualTo: currentUserId)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Text('You have no bookings yet.');
+                  }
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    child: Row(
+                      children: snapshot.data!.docs.map((doc) {
+                        final booking = doc.data() as Map<String, dynamic>;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: _buildBookingCard(booking),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              )
+            else
+              const Text('Could not load user data. Please log in again.'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          color: isActive ? Colors.white : AppColors.onSurfaceVariant,
+  Widget _buildFilterChip(String label) {
+    bool isActive = _selectedFilter == label;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedFilter = label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            color: isActive ? Colors.white : AppColors.onSurfaceVariant,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAmenityCard(
-      BuildContext context, {
-        required String title,
-        required String subtitle,
-        required String imageUrl,
-        required String tagText,
-        required Color tagColor,
-        required Color tagBg,
-        required Color tagTextColor,
-      }) {
+  Widget _buildAmenityCard(BuildContext context, Map<String, dynamic> data, String id) {
+    bool isAvailable = data['status'] == 'Available';
+    Color tagColor = isAvailable ? AppColors.secondary : AppColors.tertiaryFixed;
+    Color tagBg = isAvailable ? AppColors.secondaryContainer : AppColors.tertiaryContainer;
+    Color tagTextColor = isAvailable ? AppColors.onSecondaryContainer : AppColors.onTertiaryContainer;
+
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -190,14 +258,13 @@ class AmenitiesListScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Image Header
           SizedBox(
             height: 160,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(imageUrl, fit: BoxFit.cover),
+                Image.network(data['imageUrl'], fit: BoxFit.cover),
                 Positioned(
                   top: 16,
                   left: 16,
@@ -214,7 +281,7 @@ class AmenitiesListScreen extends StatelessWidget {
                             Container(width: 8, height: 8, decoration: BoxDecoration(color: tagColor, shape: BoxShape.circle)),
                             const SizedBox(width: 6),
                             Text(
-                              tagText,
+                              data['status'],
                               style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: tagTextColor),
                             ),
                           ],
@@ -226,37 +293,40 @@ class AmenitiesListScreen extends StatelessWidget {
               ],
             ),
           ),
-          // Content & Button
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Expanded to prevent overflow if title is too long
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        data['title'],
                         style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        subtitle,
+                        data['subtitle'] ?? '',
                         style: GoogleFonts.inter(fontSize: 14, color: AppColors.onSurfaceVariant),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Book Now Button pushing to the detail screen
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const BookAmenityDetailScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => BookAmenityDetailScreen(
+                          amenityData: data,
+                          amenityId: id,
+                          currentUid: currentUserId ?? 'unknown_user', // Pass UID here
+                        ),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -277,15 +347,30 @@ class AmenitiesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBookingCard({
-    required String title,
-    required String time,
-    required String status,
-    required IconData icon,
-    required Color bgColor,
-    required Color textColor,
-    Color? statusColor,
-  }) {
+  Widget _buildBookingCard(Map<String, dynamic> data) {
+    String status = data['status'] ?? 'Pending';
+    Color bgColor;
+    Color textColor;
+    IconData icon;
+
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        bgColor = AppColors.primaryContainer;
+        textColor = Colors.white;
+        icon = Icons.event_available;
+        break;
+      case 'rejected':
+        bgColor = Colors.red.shade100;
+        textColor = Colors.red.shade900;
+        icon = Icons.cancel;
+        break;
+      case 'pending':
+      default:
+        bgColor = AppColors.surfaceContainerHigh;
+        textColor = AppColors.onSurface;
+        icon = Icons.hourglass_empty;
+    }
+
     return Container(
       width: 260,
       padding: const EdgeInsets.all(20),
@@ -301,7 +386,10 @@ class AmenitiesListScreen extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                    color: textColor == Colors.white ? Colors.white.withOpacity(0.2) : textColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12)
+                ),
                 child: Icon(icon, color: textColor, size: 20),
               ),
               Text(
@@ -309,16 +397,16 @@ class AmenitiesListScreen extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: statusColor ?? textColor.withOpacity(0.8),
+                  color: textColor,
                   letterSpacing: 1.0,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(title, style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
+          Text(data['amenityTitle'] ?? '', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
           const SizedBox(height: 4),
-          Text(time, style: GoogleFonts.inter(fontSize: 12, color: textColor.withOpacity(0.8))),
+          Text(data['time'] ?? '', style: GoogleFonts.inter(fontSize: 12, color: textColor.withOpacity(0.8))),
         ],
       ),
     );

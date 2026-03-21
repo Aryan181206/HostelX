@@ -1,32 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_theme.dart';
 
 class BookAmenityDetailScreen extends StatefulWidget {
-  const BookAmenityDetailScreen({super.key});
+  final Map<String, dynamic> amenityData;
+  final String amenityId;
+  final String currentUid;
+
+  const BookAmenityDetailScreen({
+    super.key,
+    required this.amenityData,
+    required this.amenityId,
+    required this.currentUid,
+  });
 
   @override
   State<BookAmenityDetailScreen> createState() => _BookAmenityDetailScreenState();
 }
 
 class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
-  int _selectedDateIndex = 5;
-  int _selectedTimeIndex = 2;
+  int _selectedDateIndex = 0;
+  int _selectedTimeIndex = -1;
   int _selectedDurationIndex = 0;
+  bool _isSubmitting = false;
 
   final List<String> _days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  final List<String> _dates = ['28', '29', '30', '1', '2', '3', '4'];
+  List<dynamic> _dates = [];
+  List<dynamic> _timeSlots = [];
+  List<dynamic> _durations = [];
 
-  final List<Map<String, dynamic>> _timeSlots = [
-    {'time': '08:00 AM', 'status': 'Booked'},
-    {'time': '09:30 AM', 'status': 'Booked'},
-    {'time': '11:00 AM', 'status': 'Available'},
-    {'time': '12:30 PM', 'status': 'Available'},
-    {'time': '02:00 PM', 'status': 'Available'},
-    {'time': '03:30 PM', 'status': 'Booked'},
-    {'time': '05:00 PM', 'status': 'Available'},
-    {'time': '06:30 PM', 'status': 'Available'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _dates = widget.amenityData['dates'] ?? ['1'];
+    _timeSlots = widget.amenityData['timeSlots'] ?? [];
+    _durations = widget.amenityData['durations'] ?? [60];
+  }
+
+  Future<void> _submitBookingRequest() async {
+    if (_selectedTimeIndex == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a time slot.')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await FirebaseFirestore.instance.collection('bookings').add({
+        'uid': widget.currentUid, // Saving the admission/roll number explicitly as requested!
+        'userId': widget.currentUid, // (Optional fallback key for ease of use)
+        'amenityId': widget.amenityId,
+        'amenityTitle': widget.amenityData['title'],
+        'time': 'Date: ${_dates[_selectedDateIndex]} • ${_timeSlots[_selectedTimeIndex]}',
+        'duration': _durations[_selectedDurationIndex],
+        'status': 'Pending',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Booking request sent for approval!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  // ... The rest of the BookAmenityDetailScreen methods remain exactly the same
+  // as the previous response (_buildHeroSection, _buildDescription, _buildDateSelector,
+  // _buildTimeSlots, _buildDurationSelector, _buildBottomActionBar, etc.)
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +87,6 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Custom Back Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
@@ -50,40 +98,25 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Executive Laundry',
+                      widget.amenityData['title'],
                       style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                     ),
                   ],
                 ),
               ),
-
-              // Hero Section
               _buildHeroSection(),
               const SizedBox(height: 24),
-
-              // Date Selector
+              _buildDescription(),
+              const SizedBox(height: 24),
               _buildDateSelector(),
               const SizedBox(height: 24),
-
-              // Time Slots
               _buildTimeSlots(),
               const SizedBox(height: 24),
-
-              // Warning
-              _buildWarningBanner(),
-              const SizedBox(height: 24),
-
-              // Duration
               _buildDurationSelector(),
-              const SizedBox(height: 24),
-
-              // Booking Details
-              _buildBookingDetails(),
             ],
           ),
         ),
       ),
-      // Sticky Action Bar
       bottomNavigationBar: _buildBottomActionBar(),
     );
   }
@@ -94,8 +127,8 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        image: const DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1517677129300-07b130802f46?q=80&w=800&auto=format&fit=crop'),
+        image: DecorationImage(
+          image: NetworkImage(widget.amenityData['imageUrl']),
           fit: BoxFit.cover,
         ),
       ),
@@ -114,11 +147,33 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Executive Laundry Suite',
+              widget.amenityData['title'],
               style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDescription() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(24),
+        border: const Border(left: BorderSide(color: AppColors.secondary, width: 4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Description', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Text(
+            widget.amenityData['description'] ?? 'No description available for this amenity.',
+            style: GoogleFonts.inter(fontSize: 14, color: AppColors.onSurfaceVariant, height: 1.5),
+          ),
+        ],
       ),
     );
   }
@@ -143,12 +198,11 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(_dates.length, (index) {
+            children: List.generate(_dates.length > 7 ? 7 : _dates.length, (index) {
               bool isSelected = _selectedDateIndex == index;
-              bool isPast = index < 3;
               return Expanded(
                 child: GestureDetector(
-                  onTap: isPast ? null : () => setState(() => _selectedDateIndex = index),
+                  onTap: () => setState(() => _selectedDateIndex = index),
                   child: Container(
                     height: 40,
                     margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -158,11 +212,11 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        _dates[index],
+                        _dates[index].toString(),
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? AppColors.onPrimary : (isPast ? AppColors.outlineVariant : AppColors.onSurfaceVariant),
+                          color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -189,84 +243,44 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
         children: [
           Text('Available Slots', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          // Fixed Overflow: Lowered crossAxisCount to 3 for mobile, or adjusted AspectRatio
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 1.5, // Wider aspect ratio to fit text comfortably
+              childAspectRatio: 2.0,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
             itemCount: _timeSlots.length,
             itemBuilder: (context, index) {
-              final slot = _timeSlots[index];
-              final isBooked = slot['status'] == 'Booked';
               final isSelected = _selectedTimeIndex == index;
 
               return GestureDetector(
-                onTap: isBooked ? null : () => setState(() => _selectedTimeIndex = index),
+                onTap: () => setState(() => _selectedTimeIndex = index),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    color: isBooked ? AppColors.surfaceContainer : (isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surfaceContainerLow),
+                    color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: isSelected ? AppColors.primary : Colors.transparent, width: 2),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // FittedBox prevents text overflow on very small screens
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          slot['time'],
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isBooked ? AppColors.outline : (isSelected ? AppColors.primary : AppColors.onSurface),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        isBooked ? 'Booked' : (isSelected ? 'Select' : 'Available'),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _timeSlots[index],
                         style: GoogleFonts.inter(
-                          fontSize: 9,
-                          color: isBooked ? AppColors.outline : (isSelected ? AppColors.primary : AppColors.onSurfaceVariant),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? AppColors.primary : AppColors.onSurface,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWarningBanner() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.tertiary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: const Border(left: BorderSide(color: AppColors.tertiary, width: 4)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.tertiary, size: 20),
-          const SizedBox(width: 12),
-          // Expanded prevents text from overflowing
-          Expanded(
-            child: Text(
-              'Peak hours detected (11:00 AM - 2:00 PM). Booking duration is limited to 90 minutes.',
-              style: GoogleFonts.inter(fontSize: 12, color: AppColors.tertiary, height: 1.4),
-            ),
           ),
         ],
       ),
@@ -285,9 +299,12 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
         children: [
           Text('Duration', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          _buildDurationRadio(index: 0, label: '60 Minutes'),
-          const SizedBox(height: 12),
-          _buildDurationRadio(index: 1, label: '90 Minutes'),
+          ...List.generate(_durations.length, (index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildDurationRadio(index: index, label: '${_durations[index]} Minutes'),
+            );
+          }),
         ],
       ),
     );
@@ -322,49 +339,11 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
     );
   }
 
-  Widget _buildBookingDetails() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(24),
-        border: const Border(left: BorderSide(color: AppColors.secondary, width: 4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Booking Details', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          _buildDetailRow('Booked by', 'Julian Casablancas'),
-          const SizedBox(height: 12),
-          _buildDetailRow('Room No.', 'Suite 402 - Floor 4'),
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Total Tokens', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
-              Text('15 Tokens', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0)),
-        const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
-
   Widget _buildBottomActionBar() {
+    String selectedSlotText = _selectedTimeIndex != -1
+        ? 'Date: ${_dates[_selectedDateIndex]}, ${_timeSlots[_selectedTimeIndex]}'
+        : 'Select a slot';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
@@ -376,23 +355,20 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Fixed Overflow: Wrapped in Expanded to prevent text from pushing the button off-screen
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('SELECTED SLOT', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0)),
-                  // FittedBox prevents text wrapping awkwardly if the date is long
                   FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('Tomorrow, 11:00 AM', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
+                    child: Text(selectedSlotText, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            // Fixed Overflow: Button is now flexible and has reasonable padding
             Container(
               height: 56,
               decoration: BoxDecoration(
@@ -401,19 +377,21 @@ class _BookAmenityDetailScreenState extends State<BookAmenityDetailScreen> {
                 boxShadow: [BoxShadow(color: AppColors.primaryContainer.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
               ),
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: _isSubmitting ? null : _submitBookingRequest,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                 ),
-                child: Row(
+                child: _isSubmitting
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Confirm', style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('Request', style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                    const Icon(Icons.send, color: Colors.white, size: 18),
                   ],
                 ),
               ),
