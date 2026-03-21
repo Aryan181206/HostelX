@@ -2,8 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// Ensure these paths match your project structure
 import '../app_theme.dart';
-
+import 'admin_dashboard.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -15,13 +16,52 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   bool _obscurePassword = true;
 
+  // Controllers for text fields
+  final adminEmailController = TextEditingController();
+  final adminPasswordController = TextEditingController();
+
+  // Hardcoded credentials as per your requirement
+  final String adminEmailKey = "admin@iitism.ac.in";
+  final String adminPasswordKey = "adminiitamber";
+
+  @override
+  void dispose() {
+    adminEmailController.dispose();
+    adminPasswordController.dispose();
+    super.dispose();
+  }
+
+  // Extracted Login Logic
+  void _handleLogin() {
+    final email = adminEmailController.text.trim();
+    final password = adminPasswordController.text.trim();
+
+    if (email == adminEmailKey && password == adminPasswordKey) {
+      // Use pushReplacement so user can't "Go Back" to login screen after success
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+      );
+    } else {
+      // Show error feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Invalid Credentials. Please try again.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Background Mesh Effect (Replicating CSS radial-gradients)
+          // Background Mesh Effect
           Positioned(
             top: -150,
             left: -150,
@@ -30,7 +70,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               height: 400,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryFixed, // #dee0ff
+                color: AppColors.primaryFixed,
               ),
             ),
           ),
@@ -42,11 +82,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               height: 400,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryFixedDim, // #bac3ff
+                color: AppColors.primaryFixedDim,
               ),
             ),
           ),
-          // Blur filter to smooth the circles into a mesh gradient
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
@@ -54,7 +93,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             ),
           ),
 
-          // Main Scrollable Content
+          // Main Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -62,10 +101,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Login Card
                     Container(
                       width: double.infinity,
-                      constraints: const BoxConstraints(maxWidth: 450), // max-w-md
+                      constraints: const BoxConstraints(maxWidth: 450),
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: AppColors.surfaceContainerLowest,
@@ -80,35 +118,21 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ),
                       child: Column(
                         children: [
-                          // Header Section
+                          // Header
                           Padding(
                             padding: const EdgeInsets.all(40),
                             child: Column(
                               children: [
-                                // Brand Logo
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.night_shelter,
-                                      color: AppColors.primaryContainer,
-                                      size: 40,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'HOSTELX',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -1.0,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  'RESIDENT ONE',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1.0,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
-                                const SizedBox(height: 32),
-
-                                // Titles
+                                const SizedBox(height: 15),
                                 Text(
                                   'Admin Login',
                                   style: GoogleFonts.manrope(
@@ -131,12 +155,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             ),
                           ),
 
-                          // Form Section
+                          // Form
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 40),
                             child: Column(
                               children: [
-                                // Status Ribbon Mockup Style
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   decoration: BoxDecoration(
@@ -162,16 +185,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                // Email Field
+                                // Email
                                 _buildTextField(
+                                  controller: adminEmailController,
                                   hintText: 'Enter admin email',
                                   icon: Icons.mail_outline,
                                   keyboardType: TextInputType.emailAddress,
                                 ),
                                 const SizedBox(height: 16),
 
-                                // Password Field
+                                // Password
                                 _buildTextField(
+                                  controller: adminPasswordController,
                                   hintText: 'Enter password',
                                   icon: Icons.lock_outline,
                                   isPassword: true,
@@ -204,9 +229,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      // TODO: Implement Login Logic
-                                    },
+                                    onPressed: _handleLogin, // Fixed Navigation Logic
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
@@ -229,30 +252,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
-
-                                // Forgot Password Link
-                                Center(
-                                  child: TextButton(
-                                    onPressed: () {},
-                                    child: Text(
-                                      'Forgot Password?',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primary,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
                                 const SizedBox(height: 16),
                               ],
                             ),
                           ),
 
-                          // Secure Footer Indicator
+                          // Footer Indicator
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
@@ -278,9 +283,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Shared Component: Page Footer
-                    _buildPageFooter(),
                   ],
                 ),
               ),
@@ -292,6 +294,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String hintText,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
@@ -300,9 +303,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     VoidCallback? onToggleVisibility,
   }) {
     return TextFormField(
+      controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.onSurface),
+      style: GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: AppColors.onSurface,
+      ),
       decoration: InputDecoration(
         filled: true,
         fillColor: AppColors.surfaceContainerLow,
@@ -326,49 +334,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPageFooter() {
-    return Column(
-      children: [
-        Wrap(
-          spacing: 24,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildFooterLink('Privacy Policy'),
-            _buildFooterLink('Terms of Service'),
-            _buildFooterLink('Support'),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '© 2024 Dormer Boutique Hostel Management. All rights reserved.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: AppColors.outline.withOpacity(0.8),
-            letterSpacing: 1.0,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFooterLink(String text) {
-    return InkWell(
-      onTap: () {},
-      child: Text(
-        text.toUpperCase(),
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: AppColors.outline.withOpacity(0.8),
-          letterSpacing: 1.0,
         ),
       ),
     );

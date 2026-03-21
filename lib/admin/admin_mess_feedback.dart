@@ -1,10 +1,36 @@
+import 'package:amber_hackathon/api/user_sheet_api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../app_theme.dart';
 
-class AdminMessFeedbackScreen extends StatelessWidget {
+class AdminMessFeedbackScreen extends StatefulWidget {
   const AdminMessFeedbackScreen({super.key});
+
+  @override
+  State<AdminMessFeedbackScreen> createState() => _AdminMessFeedbackScreenState();
+}
+
+class _AdminMessFeedbackScreenState extends State<AdminMessFeedbackScreen> {
+  // Filter state: 'All', 'High Rating', 'Low Rating'
+  String _selectedFilter = 'All';
+
+  double _averageRating = 0.0;
+  int _totalReviews = 0;
+
+  void _calculateStats(List<Map<String, String>> data) {
+    if (data.isEmpty) {
+      _averageRating = 0.0;
+      _totalReviews = 0;
+      return;
+    }
+
+    double totalRatingSum = 0;
+    for (var item in data) {
+      totalRatingSum += double.tryParse(item['rating'] ?? '0') ?? 0;
+    }
+    _averageRating = totalRatingSum / data.length;
+    _totalReviews = data.length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +43,7 @@ class AdminMessFeedbackScreen extends StatelessWidget {
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)), // indigo-600
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)),
             onPressed: () => Navigator.pop(context),
             style: IconButton.styleFrom(
               backgroundColor: AppColors.surfaceContainerHigh.withOpacity(0.3),
@@ -27,262 +53,202 @@ class AdminMessFeedbackScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Mess Feedback',
+            Text('Mess Feedback',
               style: GoogleFonts.manrope(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.onSurface,
-                letterSpacing: -0.5,
+                fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface, letterSpacing: -0.5,
               ),
             ),
-            Text(
-              'Monitor student reviews and ratings',
+            Text('Monitor student reviews and ratings',
               style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.onSurfaceVariant,
+                fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant,
               ),
             ),
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: const Icon(Icons.filter_list, color: AppColors.onSurfaceVariant),
-              onPressed: () {},
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.surfaceContainerHigh.withOpacity(0.3),
-              ),
-            ),
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 24, bottom: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Summary Section (Horizontal Scroll)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              clipBehavior: Clip.none,
-              child: Row(
-                children: [
-                  _buildSummaryCard(
-                    title: 'Avg. Rating',
-                    value: '4.2',
-                    icon: Icons.star,
-                    iconColor: AppColors.secondary,
-                    iconBgColor: AppColors.secondaryContainer.withOpacity(0.3),
-                  ),
-                  const SizedBox(width: 16),
-                  _buildSummaryCard(
-                    title: 'Total Reviews',
-                    value: '48',
-                    icon: Icons.reviews,
-                    iconColor: AppColors.primary,
-                    iconBgColor: AppColors.primaryContainer.withOpacity(0.1),
-                  ),
-                  const SizedBox(width: 16),
-                  _buildSummaryCard(
-                    title: 'Positive Trend',
-                    value: '+12%',
-                    icon: Icons.trending_up,
-                    iconColor: AppColors.tertiary,
-                    iconBgColor: AppColors.tertiaryFixed.withOpacity(0.3),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
+      body: FutureBuilder<List<Map<String, String>>>(
+        future: UserSheetsApi.getAllFeedback(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF4F46E5)));
+          }
 
-            // Filters Section (Horizontal Scroll)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  _buildFilterChip('All', isActive: true),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('High Rating'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Low Rating'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Recent'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-            // Feedback List
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  _buildFeedbackCard(
-                    userId: 'ADM2401',
-                    date: '24 Oct, 01:20 PM',
-                    rating: '4.5',
-                    review: 'The lunch was excellent today, but the breakfast was a bit cold. Overall great quality of service!',
-                    avatarUrl: 'https://i.pravatar.cc/150?img=19',
-                    themeColor: AppColors.secondary,
-                    badgeBgColor: AppColors.secondaryContainer.withOpacity(0.2),
+          final rawList = snapshot.data ?? [];
+          _calculateStats(rawList);
+
+          // --- FILTER LOGIC ---
+          List<Map<String, String>> filteredList = rawList.where((item) {
+            double r = double.tryParse(item['rating'] ?? '0') ?? 0;
+            if (_selectedFilter == 'High Rating') return r > 3.0;
+            if (_selectedFilter == 'Low Rating') return r <= 2.0;
+            return true; // For 'All'
+          }).toList();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only( bottom: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Summary Cards
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  clipBehavior: Clip.none,
+                  child: Row(
+                    children: [
+                      _buildSummaryCard(
+                        title: 'Avg. Rating',
+                        value: _averageRating.toStringAsFixed(1),
+                        icon: Icons.star,
+                        iconColor: AppColors.secondary,
+                        iconBgColor: AppColors.secondaryContainer.withOpacity(0.3),
+                      ),
+                      const SizedBox(width: 16),
+                      _buildSummaryCard(
+                        title: 'Total Reviews',
+                        value: _totalReviews.toString(),
+                        icon: Icons.reviews,
+                        iconColor: AppColors.primary,
+                        iconBgColor: AppColors.primaryContainer.withOpacity(0.1),
+                      ),
+                      const SizedBox(width: 16),
+                      _buildSummaryCard(
+                        title: 'Status',
+                        value: _averageRating >= 4.0 ? 'Good' : 'Needs Work',
+                        icon: Icons.trending_up,
+                        iconColor: AppColors.tertiary,
+                        iconBgColor: AppColors.tertiaryFixed.withOpacity(0.3),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildFeedbackCard(
-                    userId: 'ADM2455',
-                    date: '23 Oct, 08:45 AM',
-                    rating: '3.0',
-                    review: 'The variety in the menu is decreasing. We need more vegetarian options for dinner.',
-                    avatarUrl: 'https://i.pravatar.cc/150?img=20',
-                    themeColor: AppColors.tertiary,
-                    badgeBgColor: AppColors.tertiaryFixed.withOpacity(0.2),
+                ),
+                const SizedBox(height: 10),
+
+                // Working Filters Section
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      _buildFilterChip('All'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('High Rating'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Low Rating'),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildFeedbackCard(
-                    userId: 'ADM2389',
-                    date: '22 Oct, 09:15 PM',
-                    rating: '1.5',
-                    review: 'Hygiene standards in the kitchen seem to be slipping. Found plastic in the dal today. Immediate action required.',
-                    avatarUrl: 'https://i.pravatar.cc/150?img=21',
-                    themeColor: AppColors.error,
-                    badgeBgColor: AppColors.errorContainer.withOpacity(0.4),
-                    isError: true,
+                ),
+                const SizedBox(height: 24),
+
+                // Feedback List
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: filteredList.isEmpty
+                      ? const Center(child: Padding(
+                    padding: EdgeInsets.only(top: 40.0),
+                    child: Text("No reviews found for this filter."),
+                  ))
+                      : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredList.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final item = filteredList[index];
+                      double rating = double.tryParse(item['rating'] ?? '0') ?? 0;
+
+                      Color themeColor = AppColors.secondary;
+                      Color badgeBg = AppColors.secondaryContainer.withOpacity(0.2);
+                      bool isCritical = false;
+
+                      if (rating <= 2.0) {
+                        themeColor = AppColors.error;
+                        badgeBg = AppColors.errorContainer.withOpacity(0.4);
+                        isCritical = true;
+                      } else if (rating <= 3.5) {
+                        themeColor = AppColors.tertiary;
+                        badgeBg = AppColors.tertiaryFixed.withOpacity(0.2);
+                      }
+
+                      return _buildFeedbackCard(
+                        userId: item['admissionNo'] ?? 'Unknown',
+                        date: item['date'] ?? '',
+                        rating: rating.toString(),
+                        review: item['feedback'] ?? '',
+                        avatarUrl: 'https://i.pravatar.cc/150?u=${item['admissionNo']}',
+                        themeColor: themeColor,
+                        badgeBgColor: badgeBg,
+                        isError: isCritical,
+                      );
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  _buildFeedbackCard(
-                    userId: 'ADM2502',
-                    date: '22 Oct, 02:30 PM',
-                    rating: '5.0',
-                    review: 'Special Sunday lunch was absolutely delicious! The paneer butter masala was restaurant quality.',
-                    avatarUrl: 'https://i.pravatar.cc/150?img=22',
-                    themeColor: AppColors.secondary,
-                    badgeBgColor: AppColors.secondaryContainer.withOpacity(0.2),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          );
+        },
+      ),
+    );
+  }
+
+  // Updated Filter Chip with GestureDetector
+  Widget _buildFilterChip(String label) {
+    bool isActive = _selectedFilter == label;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedFilter = label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isActive ? AppColors.onPrimary : AppColors.onSurfaceVariant,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-  }) {
+  // --- UI Components (Same as your request) ---
+  Widget _buildSummaryCard({required String title, required String value, required IconData icon, required Color iconColor, required Color iconBgColor}) {
     return Container(
-      width: 180,
-      padding: const EdgeInsets.all(20),
+      width: 180, padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.outlineVariant.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 24),
-          ),
+          Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconBgColor, borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: iconColor, size: 24)),
           const SizedBox(height: 16),
-          Text(
-            title.toUpperCase(),
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: AppColors.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
+          Text(title.toUpperCase(), style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant, letterSpacing: 1.0)),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.manrope(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: AppColors.onSurface,
-            ),
-          ),
+          Text(value, style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.onSurface)),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: isActive
-            ? [BoxShadow(color: AppColors.primary.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
-            : [],
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: isActive ? AppColors.onPrimary : AppColors.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeedbackCard({
-    required String userId,
-    required String date,
-    required String rating,
-    required String review,
-    required String avatarUrl,
-    required Color themeColor,
-    required Color badgeBgColor,
-    bool isError = false,
-  }) {
+  Widget _buildFeedbackCard({required String userId, required String date, required String rating, required String review, required String avatarUrl, required Color themeColor, required Color badgeBgColor, bool isError = false}) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: AppColors.surfaceContainerLowest, borderRadius: BorderRadius.circular(24), border: Border.all(color: AppColors.outlineVariant.withOpacity(0.1))),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Left Color Ribbon
-            Container(
-              width: 4,
-              color: themeColor,
-            ),
-            // Card Content
+            Container(width: 4, color: themeColor),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -291,84 +257,30 @@ class AdminMessFeedbackScreen extends StatelessWidget {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceContainer,
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: NetworkImage(avatarUrl),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
+                            CircleAvatar(radius: 20, backgroundImage: NetworkImage(avatarUrl)),
                             const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  userId,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.onSurface,
-                                  ),
-                                ),
-                                Text(
-                                  date,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Text(userId, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(date, style: GoogleFonts.inter(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                            ]),
                           ],
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: badgeBgColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: themeColor.withOpacity(0.1)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                rating,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  color: isError ? AppColors.onErrorContainer : themeColor,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.star,
-                                size: 14,
-                                color: isError ? AppColors.onErrorContainer : themeColor,
-                              ),
-                            ],
-                          ),
+                          decoration: BoxDecoration(color: badgeBgColor, borderRadius: BorderRadius.circular(12)),
+                          child: Row(children: [
+                            Text(rating, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: isError ? AppColors.error : themeColor)),
+                            const SizedBox(width: 4),
+                            Icon(Icons.star, size: 14, color: isError ? AppColors.error : themeColor),
+                          ]),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      review,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
+                    Text(review, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant, height: 1.5)),
                   ],
                 ),
               ),

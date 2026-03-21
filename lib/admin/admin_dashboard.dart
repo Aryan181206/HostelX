@@ -1,3 +1,4 @@
+import 'package:amber_hackathon/api/user_sheet_api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../app_theme.dart';
@@ -7,18 +8,28 @@ import 'admin_complaints.dart';
 import 'admin_mess_feedback.dart';
 
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        // remove back arrow
+        leading: const SizedBox(width: 0,),
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
+        centerTitle: true,
         title: Text(
           'Admin Dashboard',
           style: GoogleFonts.manrope(
@@ -126,22 +137,6 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '3 NEW',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -198,27 +193,6 @@ class AdminDashboardScreen extends StatelessWidget {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.onSurface,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryContainer.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.star, color: AppColors.secondary, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            '4.2',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
@@ -288,32 +262,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text(
-                      '5 PENDING',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.error,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('•', style: TextStyle(color: AppColors.outline)),
-                    ),
-                    Text(
-                      '3 IN PROGRESS',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.tertiary,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -368,20 +316,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.confirmation_number, color: AppColors.secondary, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      '12 bookings today',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                  ],
-                ),
+
               ],
             ),
           ),
