@@ -81,7 +81,7 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 100, left: 20, right: 20, bottom: 120),
+        padding: const EdgeInsets.only(top: 120, left: 20, right: 20, bottom: 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -462,60 +462,134 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            "Feedback",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: TextField(
-            controller: feedbackController,
-            maxLines: 4,
-            decoration: InputDecoration(
-              hintText: "Enter your feedback...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC), // light background like card
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final feedbackText = feedbackController.text.trim();
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Title
+                const Text(
+                  "Feedback",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
 
-                if (feedbackText.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter feedback")),
-                  );
-                  return;
-                }
+                const SizedBox(height: 12),
 
-                bool success = await UserSheetsApi.addFeedback(
-                  rating: rating,
-                  feedbackText: feedbackText,
-                );
+                /// Rating Display
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.orange.shade400, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Rating: $rating",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF475569),
+                      ),
+                    ),
+                  ],
+                ),
 
-                Navigator.pop(context);
+                const SizedBox(height: 16),
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? "Feedback submitted successfully ✅"
-                          : "Failed to submit feedback ❌",
+                /// TextField
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: TextField(
+                    controller: feedbackController,
+                    maxLines: 4,
+                    style: const TextStyle(fontSize: 14),
+                    decoration: const InputDecoration(
+                      hintText: "Enter your feedback...",
+                      hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                      contentPadding: EdgeInsets.all(14),
+                      border: InputBorder.none,
                     ),
                   ),
-                );
-              },
-              child: const Text("Save"),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    /// Cancel
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    /// Save Button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB), // blue accent
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 12),
+                      ),
+                      onPressed: () async {
+                        final feedbackText =
+                        feedbackController.text.trim();
+
+                        if (feedbackText.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Please enter feedback")),
+                          );
+                          return;
+                        }
+
+                        bool success = await UserSheetsApi.addFeedback(
+                          rating: rating,
+                          feedbackText: feedbackText,
+                        );
+
+                        Navigator.pop(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? "Feedback submitted successfully ✅"
+                                  : "Failed to submit feedback ❌",
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text("Save"),
+                    ),
+                  ],
+                )
+              ],
             ),
-          ],
+          ),
         );
       },
     );

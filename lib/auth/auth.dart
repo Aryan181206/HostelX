@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../admin/admin_login_screen.dart';
 import '../api/user_sheet_api.dart';
+// import 'admin_login_screen.dart'; // Make sure to import your Admin screen here
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +18,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+
+
+
+
   // Controllers
   final TextEditingController _rollController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -198,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'HostelX',
+                            'Resident One',
                             style: GoogleFonts.manrope(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -230,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Welcome Back',
+                              'Welcome ',
                               style: GoogleFonts.manrope(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -398,6 +405,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 16),
+
+                            // Text to enter as admin
+                            Center(
+                              child: TextButton(
+                                onPressed: () {
+                                  // Navigate to Admin Login Screen
+                                  // Replace AdminLoginScreen() with your actual admin login widget
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const AdminLoginScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Login as Admin',
+                                  style: GoogleFonts.inter(
+                                    color: primary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),

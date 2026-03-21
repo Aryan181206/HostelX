@@ -92,7 +92,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 15),
             // Greeting & Room Info
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +100,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
                 Text(
                   _userData != null ? (_userData!['Name'] ?? 'Student') : 'Loading...',
                   style: GoogleFonts.manrope(
-                    fontSize: 18,
+                    fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF111827),
                   ),
@@ -108,7 +108,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
                 Text(
                  _userData !=null ? ('Room ${_userData!['Room Number'] ?? 'N/A'}, Block ${_userData!['Hostel Block'] ?? 'N/A'}') : 'Room Loading...',
                   style: GoogleFonts.inter(
-                    fontSize: 13,
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF6B7280),
                   ),

@@ -1,3 +1,4 @@
+import 'package:amber_hackathon/api/user_sheet_api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -12,6 +13,30 @@ class AdminAnnouncementsScreen extends StatefulWidget {
 
 class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
   bool _isHighPriority = false;
+
+  List<Map<String, String>> announcements = [];
+  bool isLoading = true;
+
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAnnouncements();
+  }
+
+  Future<void> fetchAnnouncements() async {
+    final data = await UserSheetsApi.getAnnouncements();
+
+    setState(() {
+      announcements = data.reversed.toList(); // latest first
+      isLoading = false;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,33 +91,25 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
             // Section 2: Today's Announcements List
             _buildTodaysAnnouncementsHeader(),
             const SizedBox(height: 16),
-            _buildImportantCard(
-              title: 'Water Supply Maintenance',
-              time: '10:30 AM',
-              description: 'Please note that water supply will be suspended for Block B between 2 PM and 4 PM for tank cleaning...',
-              badgeText: 'Important',
+
+
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : announcements.isEmpty
+                ? const Text("No announcements yet")
+                : Column(
+              children: announcements.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildImportantCard(
+                    title: item['header'] ?? '',
+                    description: item['announcement'] ?? '',
+                    date: item['date'] ?? '',
+                  ),
+                );
+              }).toList(),
             ),
-            const SizedBox(height: 16),
-            _buildRegularCard(
-              title: 'Common Room Key Collection',
-              time: '09:15 AM',
-              description: 'Students who requested late-night study access can collect their digital keys from the front desk.',
-              badgeText: 'New',
-              icon: Icons.event,
-              badgeColor: AppColors.secondary,
-              badgeBgColor: AppColors.secondaryContainer.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            _buildRegularCard(
-              title: 'Internet Gateway Upgrade',
-              time: 'Yesterday',
-              description: 'The main router will be upgraded tonight at 11:59 PM. Expect brief disconnections during this time.',
-              badgeText: 'High Priority',
-              icon: Icons.warning_amber_rounded,
-              iconColor: AppColors.tertiary,
-              badgeColor: AppColors.tertiary,
-              badgeBgColor: AppColors.tertiaryFixed,
-            ),
+
             const SizedBox(height: 32),
           ],
         ),
@@ -142,91 +159,30 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
           ),
           const SizedBox(height: 24),
 
+
+
+
+          /// ✅ FIXED: Controller attached
           _buildInputLabel('Title'),
-          _buildTextField(hintText: 'Enter announcement title'),
+          _buildTextField(
+            hintText: 'Enter announcement title',
+            controller: _titleController,
+          ),
+
           const SizedBox(height: 16),
 
+          /// ✅ FIXED: Controller attached
           _buildInputLabel('Description'),
-          _buildTextField(hintText: 'Write details...', maxLines: 4),
-          const SizedBox(height: 16),
+          _buildTextField(
+            hintText: 'Write details...',
+            maxLines: 4,
+            controller: _descController,
+          ),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInputLabel('Date'),
-                    _buildTextField(
-                      hintText: 'Today, Oct 24',
-                      icon: Icons.calendar_today,
-                      isReadOnly: true,
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInputLabel('Priority'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isHighPriority = false),
-                            child: Container(
-                              height: 56, // Match text field height
-                              decoration: BoxDecoration(
-                                color: !_isHighPriority ? AppColors.surfaceContainerHigh : Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: !_isHighPriority ? Colors.transparent : AppColors.outlineVariant.withOpacity(0.3)),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Normal',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: !_isHighPriority ? AppColors.onSurface : AppColors.outline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isHighPriority = true),
-                            child: Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: _isHighPriority ? AppColors.tertiaryFixed.withOpacity(0.2) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: _isHighPriority ? AppColors.tertiaryFixed : AppColors.outlineVariant.withOpacity(0.3),
-                                  width: _isHighPriority ? 2 : 1,
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'High',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: _isHighPriority ? AppColors.tertiary : AppColors.outline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -250,7 +206,34 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
               ],
             ),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                final title = _titleController.text.trim();
+                final description = _descController.text.trim();
+
+                if (title.isEmpty || description.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please fill all fields")),
+                  );
+                  return;
+                }
+
+                bool success = await UserSheetsApi.addAnnouncement(description, title);
+
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Announcement Posted ✅")),
+                  );
+
+                  _titleController.clear();
+                  _descController.clear();
+
+                  setState(() {}); // optional refresh
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to post ❌")),
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
@@ -292,7 +275,7 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
-            '3 Recent',
+            '${announcements.length} Recent',
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -304,11 +287,36 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
     );
   }
 
+  String formatSheetDate(String rawDate) {
+    try {
+      // अगर already normal date है (yyyy-MM-dd)
+      if (rawDate.contains('-')) {
+        DateTime date = DateTime.parse(rawDate);
+        return "${date.day} ${_monthName(date.month)}";
+      }
+
+      // अगर serial number (जैसे 46102)
+      int days = int.parse(rawDate);
+      DateTime date = DateTime(1899, 12, 30).add(Duration(days: days));
+
+      return "${date.day} ${_monthName(date.month)}";
+    } catch (e) {
+      return rawDate; // fallback
+    }
+  }
+
+  String _monthName(int month) {
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+    return months[month - 1];
+  }
+
   Widget _buildImportantCard({
     required String title,
-    required String time,
     required String description,
-    required String badgeText,
+    required String date,
   }) {
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -317,7 +325,11 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 2),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Stack(
@@ -328,6 +340,8 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
             bottom: 0,
             child: Container(width: 6, color: AppColors.primary),
           ),
+
+          /// 🔥 MAIN CONTENT
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
@@ -337,65 +351,60 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF), // indigo-50
+                    color: const Color(0xFFEEF2FF),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.campaign, color: Color(0xFF4F46E5)), // indigo-600
+                  child: const Icon(Icons.campaign, color: Color(0xFF4F46E5)),
                 ),
                 const SizedBox(width: 16),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEEF2FF),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              badgeText.toUpperCase(),
-                              style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF4F46E5), letterSpacing: 1.0),
-                            ),
-                          ),
-                          Text(time, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.outline)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(title, style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                       const SizedBox(height: 4),
+
+                      Text(
+                        title,
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.onSurface,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
                       Text(
                         description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(fontSize: 13, color: AppColors.onSurfaceVariant, height: 1.5),
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: AppColors.onSurfaceVariant,
+                          height: 1.5,
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, size: 18, color: AppColors.outline),
-                            onPressed: () {},
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          const SizedBox(width: 16),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-                            onPressed: () {},
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
-                      ),
+
+                      const SizedBox(height: 20), // space for date
                     ],
                   ),
                 ),
               ],
+            ),
+          ),
+
+          /// ✅ DATE (BOTTOM RIGHT)
+          Positioned(
+            right: 16,
+            bottom: 12,
+            child: Text(
+              formatSheetDate(date),
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.outline,
+              ),
             ),
           ),
         ],
@@ -510,8 +519,10 @@ class _AdminAnnouncementsScreenState extends State<AdminAnnouncementsScreen> {
     IconData? icon,
     int maxLines = 1,
     bool isReadOnly = false,
+    TextEditingController? controller, // ✅ add this
   }) {
     return TextFormField(
+      controller: controller, // ✅ attach
       maxLines: maxLines,
       readOnly: isReadOnly,
       style: GoogleFonts.inter(color: AppColors.onSurface, fontSize: 14),

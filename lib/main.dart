@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'admin/admin_dashboard.dart';
 import 'auth/auth.dart';
 import 'firebase_options.dart';
 import 'package:amber_hackathon/home/homewrapper.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: LoginScreen(),
+      home: AdminDashboardScreen(),
     );
   }
 }
