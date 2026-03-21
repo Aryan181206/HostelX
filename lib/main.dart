@@ -12,6 +12,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await UserSheetsApi.init() ;
+  await UserSheetsApi.addAnnouncement("No food for 5 days");
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

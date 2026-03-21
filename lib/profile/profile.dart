@@ -340,7 +340,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     iconBgColor: const Color(0xFFF1F5F9), // slate-100
                     iconColor: AppColors.onSurfaceVariant,
                     onTap: () async {
-                      _showRoommateDialog(await UserSheetsApi.getRoommate() ?? {});
+
+                      final roommate = await UserSheetsApi.getRoommate();
+                      _showRoommateDialog(roommate!);
 
                     },
                   ),

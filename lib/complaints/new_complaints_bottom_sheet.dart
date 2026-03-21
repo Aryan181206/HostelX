@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../api/user_sheet_api.dart';
 import '../app_theme.dart';
+
 void showNewComplaintSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
@@ -15,21 +17,58 @@ class NewComplaintBottomSheet extends StatefulWidget {
   const NewComplaintBottomSheet({super.key});
 
   @override
-  State<NewComplaintBottomSheet> createState() => _NewComplaintBottomSheetState();
+  State<NewComplaintBottomSheet> createState() =>
+      _NewComplaintBottomSheetState();
 }
 
-class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
+class _NewComplaintBottomSheetState
+    extends State<NewComplaintBottomSheet> {
   String? _selectedCategory;
+  final TextEditingController _descriptionController =
+  TextEditingController();
+
+  bool _isLoading = false;
+  String imageUrl = ""; // optional (you can integrate upload later)
+
+  Future<void> _submitComplaint() async {
+    if (_selectedCategory == null ||
+        _descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all required fields")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final success = await UserSheetsApi.addComplaint(
+      complaintType: _selectedCategory!,
+      description: _descriptionController.text.trim(),
+      imageUrl: imageUrl,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Complaint submitted successfully")),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to submit complaint")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Ensures the sheet moves up when the keyboard appears
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
       margin: EdgeInsets.only(bottom: bottomPadding),
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.9, // max-h-[795px] equivalent
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
       ),
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -38,7 +77,7 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag Handle (Mobile only indicator)
+          // Drag Handle
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -51,12 +90,13 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
             ),
           ),
 
-          // Sticky Header
+          // Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: AppColors.outlineVariant.withOpacity(0.15)),
+                bottom: BorderSide(
+                    color: AppColors.outlineVariant.withOpacity(0.15)),
               ),
             ),
             child: Row(
@@ -82,32 +122,39 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
             ),
           ),
 
-          // Scrollable Form Body
+          // Form
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Dropdown: Complaint Type
                   _buildLabel('Complaint Type'),
                   const SizedBox(height: 8),
+
                   DropdownButtonFormField<String>(
                     value: _selectedCategory,
                     hint: Text(
                       'Select a category',
-                      style: GoogleFonts.inter(color: AppColors.onSurfaceVariant),
+                      style: GoogleFonts.inter(
+                          color: AppColors.onSurfaceVariant),
                     ),
-                    icon: const Icon(Icons.expand_more, color: AppColors.onSurfaceVariant),
+                    icon: const Icon(Icons.expand_more,
+                        color: AppColors.onSurfaceVariant),
                     dropdownColor: AppColors.surfaceContainerLowest,
-                    style: GoogleFonts.inter(color: AppColors.onSurface, fontSize: 16),
+                    style: GoogleFonts.inter(
+                        color: AppColors.onSurface, fontSize: 16),
                     decoration: _inputDecoration(),
                     items: const [
-                      DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
-                      DropdownMenuItem(value: 'plumbing', child: Text('Plumbing')),
-                      DropdownMenuItem(value: 'electrical', child: Text('Electrical')),
-                      DropdownMenuItem(value: 'cleaning', child: Text('Cleaning')),
-                      DropdownMenuItem(value: 'other', child: Text('Other')),
+                      DropdownMenuItem(
+                          value: 'Maintenance', child: Text('Maintenance')),
+                      DropdownMenuItem(
+                          value: 'Plumbing', child: Text('Plumbing')),
+                      DropdownMenuItem(
+                          value: 'Electrical', child: Text('Electrical')),
+                      DropdownMenuItem(
+                          value: 'Cleaning', child: Text('Cleaning')),
+                      DropdownMenuItem(value: 'Other', child: Text('Other')),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -115,36 +162,41 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
                       });
                     },
                   ),
+
                   const SizedBox(height: 24),
 
-                  // Text Area: Description
                   _buildLabel('Description'),
                   const SizedBox(height: 8),
+
                   TextFormField(
+                    controller: _descriptionController,
                     maxLines: 4,
-                    style: GoogleFonts.inter(color: AppColors.onSurface, fontSize: 16),
+                    style: GoogleFonts.inter(
+                        color: AppColors.onSurface, fontSize: 16),
                     decoration: _inputDecoration().copyWith(
                       hintText: 'Briefly describe the issue...',
-                      hintStyle: GoogleFonts.inter(color: AppColors.outline),
+                      hintStyle:
+                      GoogleFonts.inter(color: AppColors.outline),
                     ),
                   ),
+
                   const SizedBox(height: 24),
 
-                  // Upload Image Area
                   _buildLabel('Attachment (Optional)'),
                   const SizedBox(height: 8),
+
                   InkWell(
                     onTap: () {
-                      // Handle file upload
+                      // TODO: integrate image picker later
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.outlineVariant, width: 2),
+                        border: Border.all(
+                            color: AppColors.outlineVariant, width: 2),
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.transparent,
                       ),
                       child: Column(
                         children: [
@@ -186,39 +238,30 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
             ),
           ),
 
-          // Sticky Bottom Submit Button
+          // Submit Button
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.surface,
               border: Border(
-                top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.15)),
+                top: BorderSide(
+                    color: AppColors.outlineVariant.withOpacity(0.15)),
               ),
             ),
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               height: 56,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryContainer],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(28),
-              ),
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle form submission
-                  Navigator.pop(context);
-                },
+                onPressed: _isLoading ? null : _submitComplaint,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
+                  backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
-                child: Text(
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
                   'Submit Complaint',
                   style: GoogleFonts.manrope(
                     fontSize: 16,
@@ -245,12 +288,12 @@ class _NewComplaintBottomSheetState extends State<NewComplaintBottomSheet> {
     );
   }
 
-  // Extracted input decoration to match your Tailwind CSS focus states
   InputDecoration _inputDecoration() {
     return InputDecoration(
       filled: true,
       fillColor: AppColors.surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: const UnderlineInputBorder(
         borderSide: BorderSide.none,
         borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
