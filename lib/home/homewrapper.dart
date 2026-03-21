@@ -1,3 +1,4 @@
+import 'package:amber_hackathon/amenity_list_screen.dart';
 import 'package:amber_hackathon/home/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,7 +26,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
     Dashboard(),      // 0
     LostAndFoundScreen(),     // 1
     ComplaintsScreen(),   // 2
-    SettingsScreen(),     // 3
+    AmenitiesListScreen(),     // 3
   ];
 
   @override
@@ -159,7 +160,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
           NavigationDestination(
             icon: Icon(Icons.shopping_bag_outlined, color: Color(0xFF9CA3AF)),
             selectedIcon: Icon(Icons.shopping_bag, color: Color(0xFF4338CA)),
-            label: 'Market Place',
+            label: 'Amenities',
           ),
         ],
       ),

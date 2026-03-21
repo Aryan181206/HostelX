@@ -1,6 +1,6 @@
+import 'package:amber_hackathon/amenity_list_screen.dart';
 import 'package:amber_hackathon/complaints/complaints_screen.dart';
 import 'package:amber_hackathon/lost_and_found/lost_and_found_screen.dart';
-import 'package:amber_hackathon/marketplace_screen.dart';
 import 'package:amber_hackathon/mess_menu_screen.dart';
 import 'package:amber_hackathon/notice.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +67,7 @@ class Dashboard extends StatelessWidget {
                       color: Colors.blueAccent,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => MarketplaceScreen()),
+                        MaterialPageRoute(builder: (_) => AmenitiesListScreen()),
                       ),
                     ),
                   ),
