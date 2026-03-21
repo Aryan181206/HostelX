@@ -11,7 +11,7 @@ import 'package:amber_hackathon/home/homewrapper.dart';
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-  await UserSheetsApi.init() ;
+ // await UserSheetsApi.init() ;
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: LoginScreen(),
+      home: HomeWrapper(),
     );
   }
 }
