@@ -1,12 +1,13 @@
 import 'package:gsheets/gsheets.dart';
+import 'package:intl/intl.dart';
 
 class UserSheetsApi {
   static const _credentials = r'''
-  {
+ {
   "type": "service_account",
   "project_id": "gsheet-490820",
-  "private_key_id": "a08d22687420e1ec18008ef793adeb0464e35465",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDN3X0T/ece+1bi\nC6Q7nVjReuDYP1KmchKDhSGSSIjFllMAQfUs7TvnY9WRBabG88WJ537bcx7VlvSV\nCszx1RXesVEAtTW2ndpVqWSTgoJpGvXfDB8QpoUq/ZvCji+vvuY3WIxGJwcuP6jW\nScBKwQy1rVXKb1RQolBM73OnaL98QRUX+Rutltaib06Dz5eEJlKom0XZzmaHNSh+\nab/uAryN/aXUk2nhawiNOMo0fHKZw4V/kycp6xrWg+rbuEahvlg800dcl2C4u0Op\nSJIddnVKXUBmaBTtjcl8pV3M5Yd1AlRzPOzxSbrg44nnoc4fVbztE6Me/WIRi2t4\nMxMD/jcrAgMBAAECggEATojsAffvN1UIAKUTSsDMlOGtLCIAHEpRQMZFl+I+9y3R\nTTxcVX7NRwlBfJks1iJCHklnjj1dKntzo/YiWDGDrdh0P/JhYuDWXa6JFXMI4CLu\nYGBl63qzO8LTLIYEsCWB+uQ3Yz3ZUe3sMY+iIYKDID3XiCovfrFlM+x3cQqXXkVg\npvIdho0xaIXVCb431m+vt3oEO+W7lhEnYjxRW7liRWU+jLJZ1IIzRAwooqqK6iF0\neOHnqfYnZUACDi/xoJ+kMo2m+rHzwi06VfcSTGBuC/tMCST0UydMloq7LOb0QYd4\nLX3eVRoD7lI60wKXPA0l2r0XBdDB3DO/5E8UEVyLrQKBgQDnIIPXE2BA0iwwP5RN\nnK4yg0SHlOJh9utkQLBsbjvnE3FhVNT2jpDYHASUZSNJYloW5qAFykpTlyKZOdor\nsBaPtgcOO/Gw2Fq29ZbyxaGcRfU2nkYt8MtiD/xHQshafMMlyKdTJc1uu8UQm5iG\nqZHC6QuqUIeKwX4S0VsJA+I+rQKBgQDkBQR0sfDVvazcF/6tAnXDigfTfcGI55Ti\nGayScgCS54vIIcxxPHqbW/0cNUovYPg/+qz5iJEk7G/e/CnjiwdFxIHHAYpo5p5B\n1F5g7z/HRfSWxgngOm4QmJl8chSvgwYllExCAf8YUzxPVWQLLebP3dF9ljEomTYf\nqfEOHgXANwKBgButYRxYTaZ1hKUid/fzU0jpP0OdKJ7imr2eoYHakYHSajlllzsP\nR3kZodLDab5X8MHdTDxlRRFNf+8pZl7k7062VZH2y7KJthNCxZi84eV82yh3O6A0\nvaY4k9VUwflUB2p25NKoLDmecrLSbylxFOtqTONQUWrkUNygBW7G8EjhAoGAH6TO\nnH9BQ/hhr92om0v3Gd7i/Se7nws8bzBO8bfeeoSlsm12WNSi00Kt2qdOl0qmyQI5\n1RttwSkK0XA/Q/O8W6NMu1hsY+h1V/9n5Z3uRPJhYjczkamqMqVqz4lpc34EcVym\nRJbQVwjeGshn7OE+4eQPuZUJV3ADwdsst9/UvnsCgYEAyK1TYgQ52DdTUsfCZ/V0\nmtECpeQ3rHGfqIGNIJfjyl9r3yt72IYyYrSOrISPdvGPX6DmrHnWCUJTk6UlPWxJ\nozMSK+Scbw2JZNYhrOcI9CPKDdxiYElpTzffg+CeU3HuiIMA02FBBRiUdKlqwZ83\nokt3NSpY68FLJ+y2+02c5MY=\n-----END PRIVATE KEY-----\n",
+  "private_key_id": "5f11e0d3aeeab14bdd8e8d903c4b68089e9d44df",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDAuoRqDfw4OGOf\n6l5ne4TmKfoXEteWevLaxZLjIqlwj3kLosJUfY6HQRqzFoX/H4ZWsMeBA7tm2fcD\n2DMzUdbNtmPu1Myy22wSaUFetOyQFtUwXVncjRsMdZXwIPuk+OwSbmuS9f2gv/TL\nGZiF243VWKa2qvPPhvaeF9PbvNG8FG8+rgh3J8VAxJtpFRAeHpuLsI1AR9ng9KE7\n9mNazaAxbupgR6IybUUbT+ueO5DpzT6r8CTs3dIm0HwlqroYrdr1er4QQ3tiwCjw\nVs3S7mJRkr/GiadbAIhnxADHEszTeqhovHofusYwomG8+hq3SgNKSArGNQrISXua\nPnfbPIORAgMBAAECggEAKghDmrGkIUrDB3xgzGbW7C+ZeHDGje4Qiv/t8hV8KK1R\ns+TyRuT/MaZUQVyXKrXgYYW6bPu4Yk0FH1SGjhm6JDE0CEFmx1ctcbJ87D+/HAmu\nwxaI453umUAHzFAVMbyMF9T3Jxz5DJbwt17EseTZQP9NlKch90+y93Ww4cqDX2Yg\nkShdyQZHQQzilZKMkpZqC158/JkHmWl0Cw+SIenffsXnowEtvd4Ohe8wB0VjGeaQ\ng6YCVfC94CqIgZaEG3CGeIf3UqOT3WNPzuSND8KLu33TF2qCfMFdB+UmLmEAryy8\nxtBsDMceeMQ7Ybd+U7HId4BVqG7ckO3ibNS7TbHGtQKBgQDlUeuMq6VMN9A8sKO1\nHb5GfcFDs07Pbj2M30NFRXhseM29mhKVIx0QfuueqBr8MTa099LIf3SnbELxnHYo\n4uRxnISgbdr4xna1OdqxotWn/buKLhqrIc99kQJA0lQ/bVG3cAmr9bDiMOS9hNbQ\nFJMbvfFLu0uDRRxq5q/cvVo6pwKBgQDXJsGbYfpKnz39ffq2F/upb7fvtU7LZNno\ndA/2xzkzNUg0TGYT3XiR0be2UqW5QQn74aupxHTLWuI2MQedzV98/qWgf440G5gc\n7lek97PKkm3deDyoTmaU7VJA2d/v40KAP582mVDZWBUdkPpdS5yphI0aVqXhSRCr\nkFdrjkXvBwKBgQCEMhlr2ndL3ND6a4m0GxVZZZ1H/dHs2kw5LWuGP2oQfgN8zZjw\nyHE01TXXHGmSAHzdDhBA7Ni+uzZMOjoTj9jJdcUvBqU4zJAaIOPli01HromyOqm9\nBZyrcjCuVZGjjs2QxdGNg/EYM79pUW7UPUggsfqsAaiiX/Dl3156Dd45+QKBgBly\n9CO1Cy4Yd/SsGiO/4nzAQjmQcKmOXFgqoljGZ/Wur8O/5bMj10coT1q5m/C1yMCK\niQujuUz0ix1t30DDMjBOzriVXfS77to9NxDEW/fyKhywRDyESY4EJF6XZu2xLASP\ngf2rVOzghl7g7zxp3TYP/8DFzwk+40Hn6O9H/O2xAoGBALirIw1048aJOCyCK5EH\nBYmVl+2ib825o25UnEZ0S/oM9X0fxpRv8Kxp5lkRG3OCJ9QP+mYEFstTV+BpUFSe\nmlvLWo4vijn7LAZ5gD+XfRqf/KnwrztLtuDp01YGh/J1njY0nVKkl5kMOAbd5SZD\ndYKuxftPhxw4PBPI378Qg70l\n-----END PRIVATE KEY-----\n",
   "client_email": "gsheet@gsheet-490820.iam.gserviceaccount.com",
   "client_id": "111531553876168319365",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -17,24 +18,50 @@ class UserSheetsApi {
 }
 ''';
   static final _spreadsheet = '1NE-UpmkgvxAnUpYRuDi_IUMmx976M4q6jjjxlj4UuKM';
-  static final _gsheet = GSheets(_credentials) ;
-  static Worksheet? _userSheet ;
+  static final _gsheet = GSheets(_credentials);
 
+  static Worksheet? _userSheet;
+  static Worksheet? _announcementSheet;
 
-  static Future init() async{
-    final spreadsheet = await _gsheet.spreadsheet(_spreadsheet) ;
-    _userSheet = await _getWorkSheet(spreadsheet , title : 'Sheet1') ;
+  /// ✅ Initialize all sheets
+  static Future init() async {
+    final spreadsheet = await _gsheet.spreadsheet(_spreadsheet);
+
+    // Initialize Sheet1 (users)
+    _userSheet = await _getWorkSheet(spreadsheet, title: 'Sheet1');
+
+    // Initialize Announcement sheet
+    _announcementSheet = await _getWorkSheet(spreadsheet, title: 'Announcement');
+
+    // Ensure header exists for Announcement
+    final header = await _announcementSheet!.values.row(1);
+    if (header.isEmpty) {
+      await _announcementSheet!.values.insertRow(1, ['Date', 'Announcement']);
+    }
   }
 
-  static Future<Worksheet> _getWorkSheet(
-      Spreadsheet spreadsheet ,
+  /// ✅ Helper to get or create worksheet
+  static Future<Worksheet> _getWorkSheet(Spreadsheet spreadsheet,
       {required String title}) async {
-    try{
-      return await spreadsheet.addWorksheet(title) ;
-    }catch (e) {
-      return spreadsheet.worksheetByTitle(title)! ;
+    try {
+      return await spreadsheet.addWorksheet(title);
+    } catch (e) {
+      return spreadsheet.worksheetByTitle(title)!;
     }
+  }
 
+  /// ✅ Add new Announcement with current date
+  static Future<bool> addAnnouncement(String announcementText) async {
+    if (_announcementSheet == null) await init();
+
+    try {
+      final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      await _announcementSheet!.values.appendRow([currentDate, announcementText]);
+      return true;
+    } catch (e) {
+      print('Error adding announcement: $e');
+      return false;
+    }
   }
 
   //Login only no create account
@@ -43,8 +70,9 @@ class UserSheetsApi {
     if (_userSheet == null) return null;
 
     final rows = await _userSheet!.values.map.allRows();
+    if (rows == null) return null;
 
-    for (var row in rows!) {
+    for (var row in rows) {
       if (row['Admission No'] == admissionNo &&
           row['Password'] == password) {
         return row; // user found
@@ -58,8 +86,9 @@ class UserSheetsApi {
   static Future<Map<String, String>?> getStudent(
       String admissionNo) async {
     final rows = await _userSheet!.values.map.allRows();
+    if (rows == null) return null;
 
-    for (var row in rows!) {
+    for (var row in rows) {
       if (row['Admission No'] == admissionNo) {
         return row;
       }
@@ -72,8 +101,9 @@ class UserSheetsApi {
   static Future<bool> updatePassword(
       String admissionNo, String newPassword) async {
     final rows = await _userSheet!.values.map.allRows();
+    if (rows == null) return false;
 
-    for (int i = 0; i < rows!.length; i++) {
+    for (int i = 0; i < rows.length; i++) {
       if (rows[i]['Admission No'] == admissionNo) {
         // +2 because row index starts after header
         await _userSheet!.values.insertValue(
@@ -91,8 +121,9 @@ class UserSheetsApi {
   static Future<bool> updateRoom(
       String admissionNo, String newRoom) async {
     final rows = await _userSheet!.values.map.allRows();
+    if (rows == null) return false;
 
-    for (int i = 0; i < rows!.length; i++) {
+    for (int i = 0; i < rows.length; i++) {
       if (rows[i]['Admission No'] == admissionNo) {
         await _userSheet!.values.insertValue(
           newRoom,
@@ -104,5 +135,20 @@ class UserSheetsApi {
     }
     return false;
   }
+
+  
+
+  /// ✅ Initialize Announcement Sheet
+  static Future initAnnouncementSheet() async {
+    final spreadsheet = await _gsheet.spreadsheet(_spreadsheet);
+    _announcementSheet = await _getWorkSheet(spreadsheet, title: 'Announcement');
+
+    // Check if header exists, if not, set header
+    final header = await _announcementSheet!.values.row(1);
+    if (header.isEmpty) {
+      await _announcementSheet!.values.insertRow(1, ['Date', 'Announcement']);
+    }
+  }
+
 
 }

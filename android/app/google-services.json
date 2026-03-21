@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "630476076079",
+    "project_id": "hostelx-1d344",
+    "storage_bucket": "hostelx-1d344.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630476076079:android:e3e765940f4868227d42da",
+        "android_client_info": {
+          "package_name": "com.example.amber_hackathon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfusnV5ftJN088c8UJ2SOCrl2KilhH-4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
