@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 import '../api/user_sheet_api.dart';
 import '../app_theme.dart';
@@ -23,13 +28,69 @@ class NewComplaintBottomSheet extends StatefulWidget {
 
 class _NewComplaintBottomSheetState
     extends State<NewComplaintBottomSheet> {
+
   String? _selectedCategory;
   final TextEditingController _descriptionController =
   TextEditingController();
 
   bool _isLoading = false;
-  String imageUrl = ""; // optional (you can integrate upload later)
 
+  File? _selectedImage;
+  String imageUrl = "";
+
+  final ImagePicker _picker = ImagePicker();
+
+  /// ✅ CLOUDINARY CONFIG (IMPORTANT)
+  static const String _cloudName = 'doturqykw';
+  static const String _uploadPreset = 'hostelx'; // 👈 SAME AS WORKING CODE
+
+  /// 🔥 PICK IMAGE (COMPRESSED)
+  Future<void> _pickImage() async {
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70, // 🔥 important (fix upload fail)
+        maxWidth: 1200,
+      );
+
+      if (picked != null) {
+        setState(() {
+          _selectedImage = File(picked.path);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Image pick failed: $e")),
+      );
+    }
+  }
+
+  /// 🔥 CLOUDINARY UPLOAD (PROPER VERSION)
+  Future<String> _uploadImageToCloudinary(File imageFile) async {
+    final uri = Uri.parse(
+      'https://api.cloudinary.com/v1_1/$_cloudName/image/upload',
+    );
+
+    final request = http.MultipartRequest('POST', uri)
+      ..fields['upload_preset'] = _uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+    final response = await request.send();
+
+    final responseBody = await response.stream.bytesToString();
+
+    print("CLOUDINARY STATUS: ${response.statusCode}");
+    print("CLOUDINARY RESPONSE: $responseBody");
+
+    if (response.statusCode != 200) {
+      throw Exception("Upload failed: $responseBody");
+    }
+
+    final data = jsonDecode(responseBody);
+    return data['secure_url'];
+  }
+
+  /// 🔥 SUBMIT
   Future<void> _submitComplaint() async {
     if (_selectedCategory == null ||
         _descriptionController.text.trim().isEmpty) {
@@ -41,24 +102,34 @@ class _NewComplaintBottomSheetState
 
     setState(() => _isLoading = true);
 
-    final success = await UserSheetsApi.addComplaint(
-      complaintType: _selectedCategory!,
-      description: _descriptionController.text.trim(),
-      imageUrl: imageUrl,
-    );
+    try {
+      /// 👉 Upload image first
+      if (_selectedImage != null) {
+        imageUrl = await _uploadImageToCloudinary(_selectedImage!);
+      }
 
-    setState(() => _isLoading = false);
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Complaint submitted successfully")),
+      final success = await UserSheetsApi.addComplaint(
+        complaintType: _selectedCategory!,
+        description: _descriptionController.text.trim(),
+        imageUrl: imageUrl,
       );
-      Navigator.pop(context);
-    } else {
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Complaint submitted successfully")),
+        );
+        Navigator.pop(context);
+      } else {
+        throw Exception("Sheet API failed");
+      }
+
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to submit complaint")),
+        SnackBar(content: Text("Error: $e")),
       );
     }
+
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -77,7 +148,8 @@ class _NewComplaintBottomSheetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag Handle
+
+          /// Drag Handle
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -90,7 +162,7 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          // Header
+          /// Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
             decoration: BoxDecoration(
@@ -122,13 +194,14 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          // Form
+          /// FORM (UNCHANGED UI)
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   _buildLabel('Complaint Type'),
                   const SizedBox(height: 8),
 
@@ -146,14 +219,10 @@ class _NewComplaintBottomSheetState
                         color: AppColors.onSurface, fontSize: 16),
                     decoration: _inputDecoration(),
                     items: const [
-                      DropdownMenuItem(
-                          value: 'Maintenance', child: Text('Maintenance')),
-                      DropdownMenuItem(
-                          value: 'Plumbing', child: Text('Plumbing')),
-                      DropdownMenuItem(
-                          value: 'Electrical', child: Text('Electrical')),
-                      DropdownMenuItem(
-                          value: 'Cleaning', child: Text('Cleaning')),
+                      DropdownMenuItem(value: 'Maintenance', child: Text('Maintenance')),
+                      DropdownMenuItem(value: 'Plumbing', child: Text('Plumbing')),
+                      DropdownMenuItem(value: 'Electrical', child: Text('Electrical')),
+                      DropdownMenuItem(value: 'Cleaning', child: Text('Cleaning')),
                       DropdownMenuItem(value: 'Other', child: Text('Other')),
                     ],
                     onChanged: (value) {
@@ -186,9 +255,7 @@ class _NewComplaintBottomSheetState
                   const SizedBox(height: 8),
 
                   InkWell(
-                    onTap: () {
-                      // TODO: integrate image picker later
-                    },
+                    onTap: _pickImage,
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       width: double.infinity,
@@ -200,35 +267,15 @@ class _NewComplaintBottomSheetState
                       ),
                       child: Column(
                         children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surfaceContainerHighest,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.add_photo_alternate,
-                              color: AppColors.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Upload an image',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'PNG, JPG up to 5MB',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppColors.outline,
-                            ),
-                          ),
+                          _selectedImage == null
+                              ? Column(
+                            children: [
+                              const Icon(Icons.add_photo_alternate, size: 40),
+                              const SizedBox(height: 12),
+                              Text('Upload an image'),
+                            ],
+                          )
+                              : Image.file(_selectedImage!, height: 150),
                         ],
                       ),
                     ),
@@ -238,16 +285,9 @@ class _NewComplaintBottomSheetState
             ),
           ),
 
-          // Submit Button
+          /// Submit Button
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border(
-                top: BorderSide(
-                    color: AppColors.outlineVariant.withOpacity(0.15)),
-              ),
-            ),
             child: SizedBox(
               width: double.infinity,
               height: 56,
@@ -261,14 +301,7 @@ class _NewComplaintBottomSheetState
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                  'Submit Complaint',
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.onPrimary,
-                  ),
-                ),
+                    : const Text('Submit Complaint'),
               ),
             ),
           ),
@@ -278,34 +311,10 @@ class _NewComplaintBottomSheetState
   }
 
   Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: AppColors.onSurface,
-      ),
-    );
+    return Text(text);
   }
 
   InputDecoration _inputDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: AppColors.surfaceContainerLow,
-      contentPadding:
-      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: const UnderlineInputBorder(
-        borderSide: BorderSide.none,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.primary, width: 2),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.transparent, width: 2),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-    );
+    return const InputDecoration(border: InputBorder.none);
   }
 }

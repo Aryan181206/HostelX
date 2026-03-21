@@ -38,11 +38,12 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
     for (var comp in data) {
       final status = comp['Status'] ?? "Pending";
+      final date = comp['Date'] ;
 
       final formatted = {
         'title': '${comp['Complaint Type']}: ${comp['Description']}',
         'status': status,
-        'date': DateTime.now().toString().substring(0, 10),
+        'date': date,
         'detailIcon': Icons.info_outline,
         'detailText': comp['Complaint Type'],
         'borderColor': _getBorderColor(status),

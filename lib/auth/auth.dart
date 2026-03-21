@@ -39,6 +39,31 @@ class _LoginScreenState extends State<LoginScreen> {
   static const Color secondaryFixed = Color(0xFF68FADE);
   static const Color errorRed = Color(0xFFB00020);
 
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus(); // 🔥 auto login check
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString('user');
+
+    if (userData != null) {
+      debugPrint("User already logged in");
+
+      // Delay to avoid context issues
+      Future.microtask(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeWrapper()),
+        );
+      });
+    }
+  }
+
+
   @override
   void dispose() {
     _rollController.dispose();

@@ -4,7 +4,9 @@ import 'package:amber_hackathon/lost_and_found/lost_and_found_screen.dart';
 import 'package:amber_hackathon/mess_menu_screen.dart';
 import 'package:amber_hackathon/notice.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../api/user_sheet_api.dart';
 import '../app_theme.dart';
 import '../mess_menu_data.dart';// Make sure this path is correct for your project structure
 
@@ -134,16 +136,76 @@ class Dashboard extends StatelessWidget {
               ),
 
               /// 🔹 Notice Board Container
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: _cardDecoration(),
-                child: Column(
-                  children: [
-                    _buildAnnouncementRow("Water supply will be off tomorrow from 10 AM to 2 PM."),
-                    const Divider(height: 24, thickness: 1),
-                    _buildAnnouncementRow("Hostel gate will close at 10 PM strictly."),
-                  ],
-                ),
+              FutureBuilder<List<Map<String, String>>>(
+                future: UserSheetsApi.getAnnouncements(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: _cardDecoration(),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: _cardDecoration(),
+                      child: const Text("No announcements available"),
+                    );
+                  }
+
+                  final announcements = snapshot.data!;
+
+                  // 🔥 Sort latest first
+                  announcements.sort((a, b) => b['date']!.compareTo(a['date']!));
+
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: _cardDecoration(),
+                    child: Column(
+                      children: List.generate(announcements.length > 2 ? 2 : announcements.length, (index) {
+                        final item = announcements[index];
+
+                        // 🔹 Format date
+                        String formatDate(String rawDate) {
+                          try {
+                            // 🔹 If it's a number (Google Sheets serial date)
+                            if (double.tryParse(rawDate) != null) {
+                              int days = int.parse(rawDate);
+                              DateTime date = DateTime(1899, 12, 30).add(Duration(days: days));
+                              return DateFormat('dd MMM yyyy').format(date);
+                            }
+
+                            // 🔹 If it's normal date string
+                            return DateFormat('dd MMM yyyy')
+                                .format(DateTime.parse(rawDate));
+                          } catch (e) {
+                            return rawDate; // fallback
+                          }
+                        }
+                        String formattedDate = formatDate(item['date']!);
+                        print(formattedDate);
+                        try {
+                          formattedDate = DateFormat('dd MMM yyyy')
+                              .format(DateTime.parse(item['date']!));
+                        } catch (_) {}
+
+                        return Column(
+                          children: [
+                            _buildAnnouncementRow(
+                              header: item['header']!,
+                              announcement: item['announcement']!,
+                              date: formattedDate,
+                            ),
+                            if (index != (announcements.length > 2 ? 2 : announcements.length) - 1)
+                              const Divider(height: 24, thickness: 1),
+                          ],
+                        );
+                      }),
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 24),
@@ -212,18 +274,76 @@ class Dashboard extends StatelessWidget {
       ),
     );
   }
+  String _formatDate(String rawDate) {
+    try {
+      if (double.tryParse(rawDate) != null) {
+        int days = int.parse(rawDate);
+        DateTime date = DateTime(1899, 12, 30).add(Duration(days: days));
+        return DateFormat('dd MMM yyyy').format(date);
+      }
 
-  /// 🔹 Announcement Row (Cleaned up for the master container)
-  Widget _buildAnnouncementRow(String text) {
+      return DateFormat('dd MMM yyyy')
+          .format(DateTime.parse(rawDate));
+    } catch (e) {
+      return rawDate;
+    }
+  }
+
+  /// 🔹 Announcement Row (Enhanced UI with Header + Date)
+  Widget _buildAnnouncementRow({
+    required String header,
+    required String announcement,
+    required String date,
+  }) {
+    String formattedDate = _formatDate(date);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Icon(Icons.campaign, color: Colors.orange, size: 20),
         const SizedBox(width: 10),
+
         Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// 🔹 Header (Title)
+              Text(
+                header.isNotEmpty ? header : "Announcement",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              /// 🔹 Description
+              Text(
+                announcement,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              /// 🔹 Date
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],

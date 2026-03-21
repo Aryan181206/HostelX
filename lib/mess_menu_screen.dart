@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'api/user_sheet_api.dart';
 import 'app_theme.dart';
 import 'mess_menu_data.dart';
 
@@ -38,6 +39,8 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
     return '$dayName, ${_currentDate.day}$suffix $monthName';
   }
+
+  int selectedRating = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -273,18 +276,22 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildStar(isFilled: true),
-                        const SizedBox(width: 8),
-                        _buildStar(isFilled: true),
-                        const SizedBox(width: 8),
-                        _buildStar(isFilled: true),
-                        const SizedBox(width: 8),
-                        _buildStar(isFilled: true),
-                        const SizedBox(width: 8),
-                        _buildStar(isFilled: false),
-                      ],
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedRating = index + 1;
+                            });
+                          },
+                          icon: Icon(
+                            index < selectedRating ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 32,
+                          ),
+                        );
+                      }),
                     ),
+                    const SizedBox(height: 10),
                     const SizedBox(height: 24),
                     Container(
                       width: double.infinity,
@@ -305,7 +312,15 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (selectedRating == 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please select rating")),
+                            );
+                            return;
+                          }
+                          _showFeedbackDialog(context, selectedRating);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -438,6 +453,71 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
       isFilled ? Icons.star : Icons.star_border,
       size: 36,
       color: isFilled ? AppColors.primary : AppColors.outlineVariant,
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context, int rating) {
+    final TextEditingController feedbackController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            "Feedback",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: feedbackController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: "Enter your feedback...",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final feedbackText = feedbackController.text.trim();
+
+                if (feedbackText.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter feedback")),
+                  );
+                  return;
+                }
+
+                bool success = await UserSheetsApi.addFeedback(
+                  rating: rating,
+                  feedbackText: feedbackText,
+                );
+
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? "Feedback submitted successfully ✅"
+                          : "Failed to submit feedback ❌",
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

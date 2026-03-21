@@ -9,8 +9,8 @@ class UserSheetsApi {
   {
   "type": "service_account",
   "project_id": "gsheet-490820",
-  "private_key_id": "a492880210b38e4837a7df4504d1088e30da04fa",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCVeRBMT64HJ2lX\nw0U31Rc4CI/J7uObiu/cPO0wh8Gmm22+oVncsIl9nyxywlLRguvPiwOxssrj218s\n3wiZFkT0Z22cUlGHhfFrmtv7mmq5L//3xfnTT1q5mHgeZg/vHSrE2tzqcASajIe5\nj/BubPHRABW5CQec1cyF65/jBnCe9tQ6EJk5va0OorrnOPxTG7DQBIEApp7SDJTp\nHdDjaz79c6oebr2B5dbUPXosOpBhtws+cLowq9YXWmDO7hW2WA8oCLjQLDlYL/Gs\nkaKnaibx+4b8ZpWb91qd9IOQ9LguSt50UHLwWnNPwFkvXj8gFrLVnqKKhgqRVQK4\n87rqkd8ZAgMBAAECggEAAZ1ISkgKsqQVKgVUuuN6d+NLyPFjaZt+DLcRvsDwm//j\nbGLUvs1J/DPbEzWQbG00ESPzZcNvF+KXgWYP8zX/h6joUP8TR1nwf2oxmbg+EoL3\nX5yL9AwliDSiiNLZtYpEmydb/yI3l9hlt4uGRsMMIjw/KnueUUN+jSxm0oO6yqoO\nle4oE3RbNGx5iRapFVgd/uL4E/V1rzhyLFK3qG7dwNukKhgUR/FsHdqWZ8umU3jX\noWeSav30NxUwynAieFzZhrCljQaf1b/n342T1fUGeiH7m3CUA0Yh1qD/iATl9rxt\nQ7S/cw9WBD4gyS7+Cq2KalRtQMlDdZboekJU5jefcwKBgQDF8hyjvQFv9D8ieMU8\n+fu11gmeclrNB2IDq2jEy/MR9768BjPaKSoEsjslKDmCSZPa7zM+6/uIwCo+KxhT\nsFZjO0er+rsc1p5qwL1GznUTwRvXBr38Bc9Z631iplznPHE7Aw621R/OvQPVU2Me\n3AI/SQD7sDSqAGB5dPXkGf4TfwKBgQDBT5S3uPo0/B/6ewojhzmoCGYxPphhfTjr\n+4BfCjMXHuF3n7Tvg8I/vRcnm8OHFpHSXh2oomgih69848GohuKrL+bB2JK8h3Lr\n9jcS5hZ+IH4hnIA7H9a1IoVL0/Q6cVErUiYhrwwzhhYEcJX1aDd/1SB8KMsrkyxU\nR/qG3l95ZwKBgQDEEGZRwNp1m8YVTO6A0VOC7rikWryZrKBm5hdmJmVi/LPN5Y7i\nnjdiY2+2BDvCU0LCbn+h6XhCIaU14tW7v0QyEfuR204O6H4NW0+fnMvWf0YmHCV+\nRfr2JA0T85i96d52BzdB3aQd0JbFbE0Xue/340W4BvaDFNB6PWF5SE2j3QKBgQCj\nyPCBRVnBIMlbaXoqpf0E0LD9EkL7fqSG1J1saPDmqwRvXUJpGOKxLF388i2VPFsq\nuRE5+vhuITZfg31mc3qDfl9uaDfTQpPtNrxs58Ow84jKo5XGAnDhIbF8kMXB6pbS\nNJUYPv8AfKAU/OshdT5oscQHTmztq5GIiz/Jm4mbCwKBgG4jknxt/WMbLNlPai5D\n0Tq/u713WhOKrrivlZqhWNXhO/A9qSyYi/L6+r34nmvsh/5TZdXiSQ/JqgZga0QO\nuEmtm872VPKqKqhaqzYNU18nFJG1VpI0sMAaAAv7Zhs2mGB22uBpRmnHpy92gS7e\n+xF1+Yc6doe7YFmV91orXgW6\n-----END PRIVATE KEY-----\n",
+  "private_key_id": "066a6bc2fca11749383ec56c759f950a4512f0ea",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDBT9cgOiGAog/c\nk/x4j/b5XZfaZ4FIOrSjsu7k86hk4jSvswz8dL5vJNjFQinx1ZMcTHh4Y9AdwGV2\nTvP8G3uwwJcFHViUBtycAxcUfFT/nG4YR0OO5t3Xx2+usiHPhe83YPtCVm3uJrTu\nhPNb3TsXP4qNZ8heB6IHQghVAfjsuCvpoI16Ooy0IrzKlagqYwipKci91bYga2MG\nnzzQLI3zfxRtTqIgiIJYyZubyhoTYIUbWgaxdtSN48rrCcKo6CTO/QJTx0HnX0zi\nlaPHSU8SY9Q1lq7BwElClhmZJZKWBX3gMYN/gZ2deu2c/omnyzNu/mZ2VZ5O4/yZ\n4T2ScAMpAgMBAAECggEAFnmVXdpUVdPBu1f7RPsb8D8Y7hwVlFO698NQcg8AF4aT\nMJBFJL7f+yUSDNEV9ldp7KLZaMnWAveA9GHWjQuW9GRXypDwYPlxQbQ8RTX1XeiO\nhkUWzjD6PuGhkvKD6tA8ETi1za8lxcf7RjXv41DT026gSbN0wLXreSOMu3FowwCs\n4rIncbp+3N/SxPL1j1H1VWsaN6U8/tOlPASd6ZMiUKS16YSsyKm8sd9caNdw6uGZ\n9MTQqeX/kp5oPauAxIh3uV2z+qReyIJqBX1ZFJGLGdXmGXoOUjxUVqu/6k/9eKiS\nq5fK6/LOCiQVxtEa4NOUAO+3sacOQrCcX3lT0yHHpwKBgQDhi9YQVwira9ACy2Kp\nWTBlWLhgUqMlmpsNGtt/Mk8KrhpI69qASmHGxvZpZWgzw35oUmxHGk0aa1oFZn/K\nm5ICUkx1j2lheCO5Gd79CqO1qSOZgQhd62jGEEvPmf/mgzjyvPwJGPI80TvZNPtH\nh6X4Kue0l0wdWrvm6rLsRQMVXwKBgQDbac0JnVv1XJfiGo6d6UDcjXWJL22bubfO\nmXimx8b442vMWtAhUjpgIQSPFloLurlp9r9NKlEa3BEo0GUhfnhHSFAUEkkZTZx9\nXFBcHliAwRfHjWRotzVOpi783s/v9AWQqKlS1LQZ5B0U0BHZnwvrzmMtIUAaeLjK\nCRlo2yNsdwKBgFsRuWdznP6KU70tHjM+3fmt7xSFiXZ/jKen9oTPbXbkgZx8DwfK\nANzgLVK1LXPpNbstvKahCgzm17xifKr0Ueo6DMFTHLvMZLAysAUALMYG+2bZ4OT7\nTpzaq6GxjtAmn/HzONj7h6Pi4AV+DQ/+x5cCy/fxNzyLDF/a2E/qNaqFAoGAL7z2\nSng9UMYjmaMzknH0lcgFYaK7E121+zJzCL6AsRgyFRVRIV7VqqKkbklrsA+hVcfE\n2ZIycUieRyYISuBMZR37plJQKzwypyfVqCVGFkVs2hMOXKY35/PKV2RXE5shNtcr\neAUlZli2ZxfaOmIbYuPVujT40Imhkvul1qWPMIMCgYButDPsW51/WVFBF2lS8jTN\ncrcpSe0pXO07zTR5xnjBiBsrVFjxVHV19scsn1l5S3jZlbJTIfJwB0cpFEGPOdZX\neZHWhcpe1Sdv+5HYhdy4Thw6RRJhgPEuQG3/mJw92RrGRHK9dW4lAYcKl4z2JbQ9\nAKCYPOnVLXlj0YqEzXWBDg==\n-----END PRIVATE KEY-----\n",
   "client_email": "gsheet@gsheet-490820.iam.gserviceaccount.com",
   "client_id": "111531553876168319365",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -19,6 +19,7 @@ class UserSheetsApi {
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gsheet%40gsheet-490820.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 }
+
 ''';
   static final _spreadsheet = '1NE-UpmkgvxAnUpYRuDi_IUMmx976M4q6jjjxlj4UuKM';
   static final _gsheet = GSheets(_credentials);
@@ -26,8 +27,9 @@ class UserSheetsApi {
   static Worksheet? _userSheet;
   static Worksheet? _announcementSheet;
   static Worksheet? _complaintSheet;
+  static Worksheet? _feedbackSheet;
 
-  /// ✅ Initialize all sheets
+
   static Future init() async {
     final spreadsheet = await _gsheet.spreadsheet(_spreadsheet);
 
@@ -57,6 +59,20 @@ class UserSheetsApi {
       ]);
     }
 
+    // Initialize Feedback sheet
+    _feedbackSheet = await _getWorkSheet(spreadsheet, title: 'Feedback');
+
+// Ensure header exists
+    final feedbackHeader = await _feedbackSheet!.values.row(1);
+    if (feedbackHeader.isEmpty) {
+      await _feedbackSheet!.values.insertRow(1, [
+        'Admission No',
+        'Date',
+        'Rating',
+        'Feedback'
+      ]);
+    }
+
   }
 
   /// ✅ Helper to get or create worksheet
@@ -69,13 +85,50 @@ class UserSheetsApi {
     }
   }
 
+
+  /// ✅ ADD USER FEEDBACK
+  static Future<bool> addFeedback({
+    required int rating,
+    required String feedbackText,
+  }) async {
+    if (_feedbackSheet == null) await init();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 🔹 Get current user
+      final userDataString = prefs.getString('user');
+      if (userDataString == null) return false;
+
+      final currentUser =
+      Map<String, dynamic>.from(jsonDecode(userDataString));
+
+      final admissionNo = currentUser['Admission No'];
+
+      // 🔹 Current Date
+      final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      // 🔹 Append feedback row
+      await _feedbackSheet!.values.appendRow([
+        admissionNo,
+        currentDate,
+        rating.toString(), // store as string
+        feedbackText,
+      ]);
+
+      return true;
+    } catch (e) {
+      print("Error adding feedback: $e");
+      return false;
+    }
+  }
   /// ✅ Add new Announcement with current date
-  static Future<bool> addAnnouncement(String announcementText) async {
+  static Future<bool> addAnnouncement(String announcementText , String header) async {
     if (_announcementSheet == null) await init();
 
     try {
       final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      await _announcementSheet!.values.appendRow([currentDate, announcementText]);
+      await _announcementSheet!.values.appendRow([currentDate, announcementText , header]);
       return true;
     } catch (e) {
       print('Error adding announcement: $e');
@@ -272,7 +325,34 @@ class UserSheetsApi {
     }
   }
 
-  
+  /// ✅ GET ALL ANNOUNCEMENTS
+  static Future<List<Map<String, String>>> getAnnouncements() async {
+    if (_announcementSheet == null) await init();
+
+    try {
+      final rows = await _announcementSheet!.values.map.allRows();
+      if (rows == null) return [];
+
+      List<Map<String, String>> announcements = [];
+
+      for (var row in rows) {
+        announcements.add({
+          'date': row['Date'] ?? '',
+          'announcement': row['Announcement'] ?? '',
+          'header': row['Header'] ?? ''
+        });
+      }
+
+      return announcements;
+    } catch (e) {
+      print("Error fetching announcements: $e");
+      return [];
+    }
+  }
+
+
+
+
 
   /// ✅ Initialize Announcement Sheet
   static Future initAnnouncementSheet() async {
