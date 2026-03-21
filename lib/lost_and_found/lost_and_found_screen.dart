@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:amber_hackathon/lost_and_found/report_item_bottom_sheet.dart';
 import 'package:amber_hackathon/app_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,6 +15,8 @@ class LostAndFoundScreen extends StatefulWidget {
 
 class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
   int _activeTabIndex = 0;
+
+  String get _selectedStatus => _activeTabIndex == 0 ? 'Lost' : 'Found';
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +53,15 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 120),
+        padding: const EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 120,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
             Text(
               'Lost & Found',
               style: GoogleFonts.manrope(
@@ -73,16 +80,10 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               ),
             ),
             const SizedBox(height: 32),
-
-            // Filter & Search Section
             _buildSearchAndFilters(),
             const SizedBox(height: 32),
-
-            // Tabs
             _buildTabs(),
             const SizedBox(height: 24),
-
-            // Grid Content
             _buildItemsGrid(),
           ],
         ),
@@ -94,11 +95,12 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Bar
         TextField(
           decoration: InputDecoration(
             hintText: 'Search for items...',
-            hintStyle: GoogleFonts.inter(color: AppColors.outline.withOpacity(0.6)),
+            hintStyle: GoogleFonts.inter(
+              color: AppColors.outline.withOpacity(0.6),
+            ),
             prefixIcon: const Icon(Icons.search, color: AppColors.outline),
             filled: true,
             fillColor: AppColors.surfaceContainerLow,
@@ -109,27 +111,34 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 2,
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
-
-        // Filter Chips (Scrollable)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              // Filter Button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.filter_list, color: AppColors.onPrimary, size: 18),
+                    const Icon(
+                      Icons.filter_list,
+                      color: AppColors.onPrimary,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Filter',
@@ -177,7 +186,10 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppColors.outlineVariant.withOpacity(0.3), width: 1),
+          bottom: BorderSide(
+            color: AppColors.outlineVariant.withOpacity(0.3),
+            width: 1,
+          ),
         ),
       ),
       child: Row(
@@ -192,6 +204,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
 
   Widget _buildTab({required String title, required int index}) {
     final isActive = _activeTabIndex == index;
+
     return GestureDetector(
       onTap: () => setState(() => _activeTabIndex = index),
       child: Container(
@@ -217,46 +230,76 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
   }
 
   Widget _buildItemsGrid() {
-    // For responsive layout, adapting HTML grid behavior into Flutter Columns for mobile
-    return Column(
-      children: [
-        _buildItemCard(
-          title: 'Student ID Card',
-          imageUrl: 'https://images.unsplash.com/photo-1633265486064-086b219458ce?q=80&w=600&auto=format&fit=crop', // ID Placeholder
-          avatarUrl: 'https://i.pravatar.cc/150?img=5',
-          location: 'Near Central Mess Hall',
-          date: 'Oct 24, 2023 • 10:30 AM',
-          status: 'Lost',
-          isUrgent: true,
-        ),
-        const SizedBox(height: 24),
-        _buildItemCard(
-          title: 'Black Wallet',
-          imageUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=600&auto=format&fit=crop', // Wallet Placeholder
-          avatarUrl: 'https://i.pravatar.cc/150?img=7',
-          location: 'Reading Room B',
-          date: 'Oct 23, 2023 • 04:15 PM',
-          status: 'Lost',
-        ),
-        const SizedBox(height: 24),
-        _buildItemCard(
-          title: 'Silver Keys',
-          imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=600&auto=format&fit=crop', // Keys Placeholder
-          avatarUrl: 'https://i.pravatar.cc/150?img=9',
-          location: 'Gym Area',
-          date: 'Oct 22, 2023 • 08:00 AM',
-          status: 'Found',
-        ),
-        const SizedBox(height: 24),
-        _buildItemCard(
-          title: 'AirPods Pro',
-          imageUrl: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=600&auto=format&fit=crop', // AirPods Placeholder
-          avatarUrl: 'https://i.pravatar.cc/150?img=11',
-          location: 'Lobby Lounge',
-          date: 'Oct 21, 2023 • 11:20 PM',
-          status: 'Lost',
-        ),
-      ],
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('lost_found_items')
+          .where('status', isEqualTo: _selectedStatus)
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: Center(
+              child: Text(
+                'Error loading items.\nCheck Firestore index and query.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.red,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: Center(
+              child: Text(
+                _selectedStatus == 'Lost'
+                    ? 'No lost items 😌'
+                    : 'No found items 🤝',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: docs.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 24),
+          itemBuilder: (context, index) {
+            final data = docs[index].data();
+
+            return _buildItemCard(
+              title: data['title'] ?? '',
+              imageUrl: data['imageUrl'] ?? '',
+              avatarUrl: data['avatarUrl'] ?? '',
+              location: data['location'] ?? '',
+              date: data['date'] ?? '',
+              status: data['status'] ?? '',
+              isUrgent: data['isUrgent'] ?? false,
+            );
+          },
+        );
+      },
     );
   }
 
@@ -270,15 +313,17 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     bool isUrgent = false,
   }) {
     final bool isLost = status.toLowerCase() == 'lost';
-    // Exact colors from your custom CSS block
-    final Color ribbonColor = isLost ? const Color(0xFFFFB74D) : const Color(0xFF00BFA6);
+    final Color ribbonColor =
+    isLost ? const Color(0xFFFFB74D) : const Color(0xFF00BFA6);
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(24),
-        border: isUrgent ? Border.all(color: AppColors.tertiaryFixed, width: 2) : null,
+        border: isUrgent
+            ? Border.all(color: AppColors.tertiaryFixed, width: 2)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -289,7 +334,6 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
       ),
       child: Stack(
         children: [
-          // Left Side Status Ribbon
           Positioned(
             left: 0,
             top: 0,
@@ -299,13 +343,11 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               color: ribbonColor,
             ),
           ),
-
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Header
               SizedBox(
-                height: 192, // h-48 equivalent
+                height: 192,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -313,6 +355,13 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                     Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppColors.surfaceContainerHigh,
+                          child: const Icon(Icons.image_not_supported,
+                              size: 48),
+                        );
+                      },
                     ),
                     if (isUrgent)
                       Positioned(
@@ -323,8 +372,12 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                           child: BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              color: AppColors.tertiaryContainer.withOpacity(0.9),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              color:
+                              AppColors.tertiaryContainer.withOpacity(0.9),
                               child: Text(
                                 'URGENT',
                                 style: GoogleFonts.inter(
@@ -341,26 +394,26 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                   ],
                 ),
               ),
-
-              // Card Details
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and Avatar
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          title,
-                          style: GoogleFonts.manrope(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.onSurface,
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.manrope(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurface,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 12),
                         Container(
                           width: 32,
                           height: 32,
@@ -368,7 +421,10 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2),
                             boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 4),
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                              ),
                             ],
                             image: DecorationImage(
                               image: NetworkImage(avatarUrl),
@@ -379,45 +435,50 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    // Location
                     Row(
                       children: [
-                        Icon(Icons.location_on, size: 16, color: AppColors.onSurfaceVariant),
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: AppColors.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 8),
-                        Text(
-                          location,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.onSurfaceVariant,
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-
-                    // Date
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 16, color: AppColors.onSurfaceVariant),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: AppColors.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 8),
-                        Text(
-                          date,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.onSurfaceVariant,
+                        Expanded(
+                          child: Text(
+                            date,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 24),
                     const Divider(height: 1),
                     const SizedBox(height: 16),
-
-                    // Footer Action
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -426,7 +487,9 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isLost ? AppColors.tertiary : AppColors.secondary,
+                            color: isLost
+                                ? AppColors.tertiary
+                                : AppColors.secondary,
                             letterSpacing: 1.0,
                           ),
                         ),
@@ -441,7 +504,11 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(Icons.arrow_forward, size: 16, color: AppColors.primary),
+                            const Icon(
+                              Icons.arrow_forward,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
                           ],
                         ),
                       ],
