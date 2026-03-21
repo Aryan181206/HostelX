@@ -57,7 +57,7 @@ class _AmenitiesListScreenState extends State<AmenitiesListScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 120),
         child: Column(

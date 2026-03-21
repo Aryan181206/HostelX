@@ -126,7 +126,7 @@ class Dashboard extends StatelessWidget {
                     ),
                     child: Row(
                       children: const [
-                        Text("View More"),
+                        Text("View More", style: TextStyle(color: AppColors.primary)),
                         SizedBox(width: 4),
                         Icon(Icons.arrow_forward_ios, size: 14),
                       ],

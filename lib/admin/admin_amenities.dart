@@ -17,7 +17,6 @@ class AdminAmenitiesScreen extends StatefulWidget {
 class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
   int _activeTabIndex = 0;
 
-  // --- Form Controllers & State ---
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _datesController = TextEditingController();
@@ -33,8 +32,8 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
   ];
   final List<String> _selectedTimeSlots = [];
 
-  final String cloudName = 'doturqykw'; // Replace with your Cloudinary cloud name
-  final String uploadPreset = 'hostelx'; // Replace with your Unsigned upload preset
+  final String cloudName = 'doturqykw';
+  final String uploadPreset = 'hostelx';
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -57,7 +56,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
       if (response.statusCode == 200) {
         final responseData = await response.stream.bytesToString();
         final jsonMap = jsonDecode(responseData);
-        return jsonMap['secure_url']; // The uploaded image URL
+        return jsonMap['secure_url'];
       } else {
         debugPrint('Cloudinary Error: ${response.statusCode}');
         return null;
@@ -77,18 +76,15 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // 1. Upload Image
       String? imageUrl = await _uploadImageToCloudinary(_selectedImage!);
 
       if (imageUrl == null) {
         throw Exception("Image upload failed");
       }
 
-      // 2. Parse comma-separated dates and duration
       List<String> datesList = _datesController.text.split(',').map((e) => e.trim()).toList();
       List<int> durationsList = _durationController.text.split(',').map((e) => int.tryParse(e.trim()) ?? 60).toList();
 
-      // 3. Save to Firestore
       await FirebaseFirestore.instance.collection('amenities').add({
         'title': _nameController.text.trim(),
         'description': _descController.text.trim(),
@@ -110,7 +106,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         _selectedTimeSlots.clear();
         _isActiveAmenity = true;
         _isSubmitting = false;
-        _activeTabIndex = 0; // Stay on the tab, but show success
+        _activeTabIndex = 0;
       });
 
       if (mounted) {
@@ -230,14 +226,18 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Register New Amenity',
-              style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface),
+            Expanded(
+              child: Text(
+                'Register New Amenity',
+                style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface),
+              ),
             ),
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.secondary, shape: BoxShape.circle)),
                   const SizedBox(width: 6),
@@ -263,7 +263,6 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
               _buildUnderlineInput('Description', 'Describe the facility...', maxLines: 2, controller: _descController),
               const SizedBox(height: 24),
 
-              // Image Upload
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -417,7 +416,9 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Recent Requests', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface)),
+            Expanded(
+              child: Text('Recent Requests', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface)),
+            ),
             Text('VIEW ALL', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.0)),
           ],
         ),
@@ -524,13 +525,16 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
                     child: ElevatedButton.icon(
                       onPressed: () => _updateRequestStatus(docId, 'Confirmed'),
                       icon: const Icon(Icons.check_circle, size: 16, color: Colors.white),
-                      label: Text('Approve', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Approve', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                       ),
                     ),
                   ),
@@ -539,12 +543,15 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _updateRequestStatus(docId, 'Rejected'),
                       icon: const Icon(Icons.cancel, size: 16, color: AppColors.error),
-                      label: Text('Reject', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Reject', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
                         side: const BorderSide(color: AppColors.error, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                       ),
                     ),
                   ),

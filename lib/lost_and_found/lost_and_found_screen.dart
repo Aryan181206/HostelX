@@ -15,6 +15,7 @@ class LostAndFoundScreen extends StatefulWidget {
 
 class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
   int _activeTabIndex = 0;
+  String _searchQuery = '';
 
   String get _selectedStatus => _activeTabIndex == 0 ? 'Lost' : 'Found';
 
@@ -80,7 +81,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            _buildSearchAndFilters(),
+            _buildSearchBar(), // Updated method
             const SizedBox(height: 32),
             _buildTabs(),
             const SizedBox(height: 24),
@@ -91,92 +92,33 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     );
   }
 
-  Widget _buildSearchAndFilters() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Search for items...',
-            hintStyle: GoogleFonts.inter(
-              color: AppColors.outline.withOpacity(0.6),
-            ),
-            prefixIcon: const Icon(Icons.search, color: AppColors.outline),
-            filled: true,
-            fillColor: AppColors.surfaceContainerLow,
-            contentPadding: const EdgeInsets.symmetric(vertical: 20),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(
-                color: AppColors.primary,
-                width: 2,
-              ),
-            ),
-          ),
+  // Renamed from _buildSearchAndFilters and removed the filter chips
+  Widget _buildSearchBar() {
+    return TextField(
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value.toLowerCase(); // Update query on text change
+        });
+      },
+      decoration: InputDecoration(
+        hintText: 'Search for items...',
+        hintStyle: GoogleFonts.inter(
+          color: AppColors.outline.withOpacity(0.6),
         ),
-        const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.filter_list,
-                      color: AppColors.onPrimary,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Filter',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.onPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip('Electronics'),
-              const SizedBox(width: 8),
-              _buildFilterChip('ID Cards'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Wallets'),
-            ],
-          ),
+        prefixIcon: const Icon(Icons.search, color: AppColors.outline),
+        filled: true,
+        fillColor: AppColors.surfaceContainerLow,
+        contentPadding: const EdgeInsets.symmetric(vertical: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
-      ],
-    );
-  }
-
-  Widget _buildFilterChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: AppColors.onSurfaceVariant,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: 2,
+          ),
         ),
       ),
     );
@@ -263,12 +205,23 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
 
         final docs = snapshot.data?.docs ?? [];
 
-        if (docs.isEmpty) {
+        // Apply local search filtering to the documents returned from Firestore
+        final filteredDocs = docs.where((doc) {
+          final data = doc.data();
+          final title = (data['title'] ?? '').toString().toLowerCase();
+          final location = (data['location'] ?? '').toString().toLowerCase();
+
+          return title.contains(_searchQuery) || location.contains(_searchQuery);
+        }).toList();
+
+        if (filteredDocs.isEmpty) {
           return Padding(
             padding: const EdgeInsets.only(top: 50),
             child: Center(
               child: Text(
-                _selectedStatus == 'Lost'
+                _searchQuery.isNotEmpty
+                    ? 'No items match your search 🔍'
+                    : _selectedStatus == 'Lost'
                     ? 'No lost items 😌'
                     : 'No found items 🤝',
                 style: GoogleFonts.inter(
@@ -283,10 +236,10 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
         return ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: docs.length,
+          itemCount: filteredDocs.length,
           separatorBuilder: (context, index) => const SizedBox(height: 24),
           itemBuilder: (context, index) {
-            final data = docs[index].data();
+            final data = filteredDocs[index].data();
 
             return _buildItemCard(
               title: data['title'] ?? '',
@@ -294,6 +247,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
               avatarUrl: data['avatarUrl'] ?? '',
               location: data['location'] ?? '',
               date: data['date'] ?? '',
+              phone: data['phone'] ?? 'N/A', // Fetched phone
+              room: data['room'] ?? 'N/A', // Fetched room
               status: data['status'] ?? '',
               isUrgent: data['isUrgent'] ?? false,
             );
@@ -309,6 +264,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     required String avatarUrl,
     required String location,
     required String date,
+    required String phone,
+    required String room,
     required String status,
     bool isUrgent = false,
   }) {
@@ -437,7 +394,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.location_on,
                           size: 16,
                           color: AppColors.onSurfaceVariant,
@@ -458,7 +415,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.calendar_today,
                           size: 16,
                           color: AppColors.onSurfaceVariant,
@@ -467,6 +424,48 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                         Expanded(
                           child: Text(
                             date,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.phone,
+                          size: 16,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            phone,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.meeting_room,
+                          size: 16,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            room,
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -492,24 +491,6 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                                 : AppColors.secondary,
                             letterSpacing: 1.0,
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'View Details',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward,
-                              size: 16,
-                              color: AppColors.primary,
-                            ),
-                          ],
                         ),
                       ],
                     ),

@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app_theme.dart';
 import 'admin_amenities.dart';
 import 'admin_announcements.dart';
-import 'admin_call_directory.dart';
 import 'admin_complaints.dart';
 import 'admin_mess_feedback.dart';
 
@@ -55,24 +54,17 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 1. Announcements Card
             _buildAnnouncementsCard(context),
             const SizedBox(height: 20),
 
-            // 2. Mess Feedback Card
             _buildMessFeedbackCard(context),
             const SizedBox(height: 20),
 
-            // 3. See Complaints Card
             _buildComplaintsCard(context),
             const SizedBox(height: 20),
 
-            // 4. Amenities Card
             _buildAmenitiesCard(context),
-            const SizedBox(height: 20),
 
-            // 5. Call Student Card (Primary Focus)
-            _buildCallStudentCard(context),
           ],
         ),
       ),
@@ -98,7 +90,7 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget _buildAnnouncementsCard(BuildContext context) {
     return Container(
       decoration: _cardDecoration(),
-      clipBehavior: Clip.antiAlias, // Ensures the ripple effect stays within rounded corners
+      clipBehavior: Clip.antiAlias,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -117,7 +109,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF), // indigo-50
+                    color: const Color(0xFFEEF2FF),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(Icons.campaign, color: AppColors.primary, size: 32),
@@ -389,109 +381,6 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCallStudentCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.primaryContainer,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryContainer.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AdminStudentDirectoryScreen()),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.phone, color: Colors.white, size: 32),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Call Student',
-                            style: GoogleFonts.manrope(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Contact students directly from the centralized registry.',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFFE0E7FF), // indigo-100 equivalent
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AdminStudentDirectoryScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'OPEN DIRECTORY',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),

@@ -12,6 +12,7 @@ class NoticesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: FutureBuilder<List<Map<String, String>>>(
         future: UserSheetsApi.getAnnouncements(),
         builder: (context, snapshot) {
