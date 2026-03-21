@@ -1,7 +1,14 @@
+import 'package:amber_hackathon/complaints/complaints_screen.dart';
+import 'package:amber_hackathon/lost_and_found/lost_and_found_screen.dart';
+import 'package:amber_hackathon/marketplace_screen.dart';
+import 'package:amber_hackathon/mess_menu_screen.dart';
+import 'package:amber_hackathon/notice.dart';
 import 'package:flutter/material.dart';
 
+import '../app_theme.dart';
+
 class Dashboard extends StatelessWidget {
-  const Dashboard({super.key}); // ✅ FIXED
+  const Dashboard({super.key});
 
   // 🔹 Common Spacing
   static const double spacing = 16;
@@ -25,60 +32,124 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(spacing),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// 🔹 Quick Actions
               const Text("Quick Actions", style: sectionTitle),
               const SizedBox(height: 12),
 
+              // First Row of Actions
               Row(
                 children: [
                   Expanded(
                     child: _buildActionCard(
+                      context: context,
                       icon: Icons.report_problem,
-                      title: "Complaint",
+                      title: "Raise a\nComplaint",
                       color: Colors.redAccent,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ComplaintsScreen()),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildActionCard(
-                      icon: Icons.exit_to_app,
-                      title: "Leave Request",
+                      context: context,
+                      icon: Icons.storefront,
+                      title: "Book\nFacility",
                       color: Colors.blueAccent,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => MarketplaceScreen()),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Second Row of Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionCard(
+                      context: context,
+                      icon: Icons.restaurant_menu,
+                      title: "Mess\nMenu",
+                      color: Colors.green,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MessMenuScreen()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildActionCard(
+                      context: context,
+                      icon: Icons.travel_explore,
+                      title: "Lost and\nFound",
+                      color: Colors.orange,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LostAndFoundScreen()),
+                      ),
                     ),
                   ),
                 ],
               ),
 
+              const SizedBox(height: 24),
 
+              /// 🔹 Notice Board Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Notice Board", style: sectionTitle),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NoticesScreen()),
+                    ),
+                    child: Row(
+                      children: const [
+                        Text("View More"),
+                        SizedBox(width: 4),
+                        Icon(Icons.arrow_forward_ios, size: 14),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
 
-              /// 🔹 Notice Board
-              const Text("Notice Board", style: sectionTitle),
-              const SizedBox(height: 12),
-
-              _buildAnnouncementCard(
-                  "Water supply will be off tomorrow from 10 AM to 2 PM."),
-              _buildAnnouncementCard(
-                  "Hostel gate will close at 10 PM strictly."),
+              /// 🔹 Notice Board Container
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: _cardDecoration(),
+                child: Column(
+                  children: [
+                    _buildAnnouncementRow("Water supply will be off tomorrow from 10 AM to 2 PM."),
+                    const Divider(height: 24, thickness: 1),
+                    _buildAnnouncementRow("Hostel gate will close at 10 PM strictly."),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 24),
 
               /// 🔹 Mess Section
-              const Text("What is in Today's Food? 🍽️",
-                  style: sectionTitle),
+              const Text("What is in Today's Food? 🍽️", style: sectionTitle),
               const SizedBox(height: 12),
 
               _buildMessCard(),
 
               const SizedBox(height: 20),
-
             ],
           ),
         ),
@@ -101,42 +172,57 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  /// 🔹 Quick Action Card
+  /// 🔹 Quick Action Card (Updated with Navigation)
   Widget _buildActionCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required Color color,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withOpacity(0.2)),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  /// 🔹 Announcement Card
-  Widget _buildAnnouncementCard(String text) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: _cardDecoration(),
-      child: Row(
-        children: const [
-          Icon(Icons.campaign, color: Colors.orange),
-          SizedBox(width: 10),
-          Expanded(child: Text("")),
-        ],
-      ),
-    ).copyWithText(text);
+  /// 🔹 Announcement Row (Cleaned up for the master container)
+  Widget _buildAnnouncementRow(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.campaign, color: Colors.orange, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    );
   }
 
   /// 🔹 Mess Card
@@ -147,7 +233,6 @@ class Dashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           /// Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,21 +313,3 @@ class Dashboard extends StatelessWidget {
   }
 }
 
-/// 🔥 Extension to fix text inside announcement cleanly
-extension on Container {
-  Widget copyWithText(String text) {
-    final row = (child as Row);
-    return Container(
-      margin: margin,
-      padding: padding,
-      decoration: decoration,
-      child: Row(
-        children: [
-          row.children[0],
-          row.children[1],
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
-  }
-}

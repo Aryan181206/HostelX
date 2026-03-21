@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:amber_hackathon/lost_and_found/report_item_bottom_sheet.dart';
-import 'package:amber_hackathon/widget/app_theme.dart';
+import 'package:amber_hackathon/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,7 +18,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16, right: 8),
         width: 64,
