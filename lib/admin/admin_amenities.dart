@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import '../app_theme.dart';
 
 class AdminAmenitiesScreen extends StatefulWidget {
@@ -11,8 +15,135 @@ class AdminAmenitiesScreen extends StatefulWidget {
 }
 
 class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
-  int _activeTabIndex = 0; 
+  int _activeTabIndex = 0;
+
+  // --- Form Controllers & State ---
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  final TextEditingController _datesController = TextEditingController();
+  final TextEditingController _durationController = TextEditingController(text: '60');
+
+  File? _selectedImage;
   bool _isActiveAmenity = true;
+  bool _isSubmitting = false;
+
+  final List<String> _availableTimeSlots = [
+    '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM',
+    '12:00 PM', '01:00 PM', '02:00 PM', '04:00 PM', '06:00 PM'
+  ];
+  final List<String> _selectedTimeSlots = [];
+
+  final String cloudName = 'doturqykw'; // Replace with your Cloudinary cloud name
+  final String uploadPreset = 'hostelx'; // Replace with your Unsigned upload preset
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String?> _uploadImageToCloudinary(File imageFile) async {
+    try {
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = uploadPreset
+        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final jsonMap = jsonDecode(responseData);
+        return jsonMap['secure_url']; // The uploaded image URL
+      } else {
+        debugPrint('Cloudinary Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Upload Error: $e');
+      return null;
+    }
+  }
+
+  Future<void> _submitAmenity() async {
+    if (_nameController.text.isEmpty || _descController.text.isEmpty || _selectedImage == null || _selectedTimeSlots.isEmpty || _datesController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields and select an image & slots.')));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 1. Upload Image
+      String? imageUrl = await _uploadImageToCloudinary(_selectedImage!);
+
+      if (imageUrl == null) {
+        throw Exception("Image upload failed");
+      }
+
+      // 2. Parse comma-separated dates and duration
+      List<String> datesList = _datesController.text.split(',').map((e) => e.trim()).toList();
+      List<int> durationsList = _durationController.text.split(',').map((e) => int.tryParse(e.trim()) ?? 60).toList();
+
+      // 3. Save to Firestore
+      await FirebaseFirestore.instance.collection('amenities').add({
+        'title': _nameController.text.trim(),
+        'description': _descController.text.trim(),
+        'imageUrl': imageUrl,
+        'status': _isActiveAmenity ? 'Available' : 'Unavailable',
+        'dates': datesList,
+        'timeSlots': _selectedTimeSlots,
+        'durations': durationsList,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // 4. Reset Form
+      setState(() {
+        _nameController.clear();
+        _descController.clear();
+        _datesController.clear();
+        _durationController.text = '60';
+        _selectedImage = null;
+        _selectedTimeSlots.clear();
+        _isActiveAmenity = true;
+        _isSubmitting = false;
+        _activeTabIndex = 0; // Stay on the tab, but show success
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Amenity registered successfully!')));
+      }
+
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Future<void> _updateRequestStatus(String docId, String newStatus) async {
+    try {
+      await FirebaseFirestore.instance.collection('bookings').doc(docId).update({
+        'status': newStatus,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request $newStatus')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update: $e')));
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    _datesController.dispose();
+    _durationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +156,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)), // Indigo-600
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF4F46E5)),
             onPressed: () => Navigator.pop(context),
             style: IconButton.styleFrom(
               backgroundColor: AppColors.surfaceContainerHigh.withOpacity(0.3),
@@ -37,7 +168,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
           style: GoogleFonts.manrope(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF4338CA), // Indigo-700
+            color: const Color(0xFF4338CA),
             letterSpacing: -0.5,
           ),
         ),
@@ -47,7 +178,6 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Navigation Tabs (Segmented Control)
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -62,11 +192,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
               ),
             ),
             const SizedBox(height: 32),
-
-            // Dynamic Content based on selected tab
-            _activeTabIndex == 0
-                ? _buildRegisterAmenitySection()
-                : _buildRequestsSection(),
+            _activeTabIndex == 0 ? _buildRegisterAmenitySection() : _buildRequestsSection(),
           ],
         ),
       ),
@@ -82,9 +208,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         decoration: BoxDecoration(
           color: isActive ? AppColors.surfaceContainerLowest : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: isActive
-              ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))]
-              : [],
+          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))] : [],
         ),
         alignment: Alignment.center,
         child: Text(
@@ -99,133 +223,113 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
     );
   }
 
-  // ==========================================
-  // SECTION 1: AMENITIES (REGISTER FORM)
-  // ==========================================
   Widget _buildRegisterAmenitySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Register New Amenity',
-              style: GoogleFonts.manrope(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: AppColors.onSurface,
-              ),
+              style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
               child: Row(
                 children: [
                   Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.secondary, shape: BoxShape.circle)),
                   const SizedBox(width: 6),
-                  Text(
-                    'NEW ENTRY',
-                    style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 1.0),
-                  ),
+                  Text('NEW ENTRY', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 1.0)),
                 ],
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-
-        // Form Card
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: AppColors.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 30, offset: const Offset(0, 8)),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 30, offset: const Offset(0, 8))],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildUnderlineInput('Amenity Name', 'e.g. Study Hall A'),
+              _buildUnderlineInput('Amenity Name', 'e.g. Study Hall A', controller: _nameController),
               const SizedBox(height: 24),
-              _buildUnderlineInput('Description', 'Describe the facility...', maxLines: 2),
+              _buildUnderlineInput('Description', 'Describe the facility...', maxLines: 2, controller: _descController),
               const SizedBox(height: 24),
 
-              // Image Upload Placeholder
-              Container(
-                width: double.infinity,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineVariant, width: 2), // Dashed in HTML, solid here for simplicity
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.add_a_photo_outlined, color: AppColors.outline, size: 32),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Upload Facility Photo',
-                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.outline),
-                    ),
-                  ],
+              // Image Upload
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: double.infinity,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.outlineVariant, width: 2),
+                    image: _selectedImage != null
+                        ? DecorationImage(image: FileImage(_selectedImage!), fit: BoxFit.cover)
+                        : null,
+                  ),
+                  child: _selectedImage == null
+                      ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.add_a_photo_outlined, color: AppColors.outline, size: 32),
+                      const SizedBox(height: 8),
+                      Text('Upload Facility Photo', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.outline)),
+                    ],
+                  )
+                      : null,
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Grid for Duration and Date
               Row(
                 children: [
                   Expanded(
-                    child: _buildUnderlineDropdown('Duration', '60 Mins', ['60 Mins', '90 Mins', '120 Mins']),
+                    child: _buildUnderlineInput('Durations (Mins)', 'e.g. 60, 90', controller: _durationController),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildUnderlineInput('Available Date', 'Oct 24, 2023', icon: Icons.calendar_today, isReadOnly: true),
+                    child: _buildUnderlineInput('Available Dates', 'e.g. 28, 29, 30', icon: Icons.calendar_today, controller: _datesController),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // Time Slots Chips
-              Text(
-                'AVAILABLE SLOTS',
-                style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0),
-              ),
+              Text('AVAILABLE SLOTS', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: [
-                  _buildSlotChip('10:00 AM', isActive: true),
-                  _buildSlotChip('11:00 AM'),
-                  _buildSlotChip('12:00 PM'),
-                  _buildSlotChip('01:00 PM'),
-                  _buildSlotChip('02:00 PM'),
-                ],
+                children: _availableTimeSlots.map((time) {
+                  final isSelected = _selectedTimeSlots.contains(time);
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isSelected ? _selectedTimeSlots.remove(time) : _selectedTimeSlots.add(time);
+                      });
+                    },
+                    child: _buildSlotChip(time, isActive: isSelected),
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 24),
 
-              // Active Toggle
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: const BoxDecoration(
-                  border: Border(top: BorderSide(color: AppColors.surfaceContainer, width: 1)),
-                ),
+                decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.surfaceContainer, width: 1))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Set as Active',
-                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
-                    ),
+                    Text('Set as Active', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     Switch(
                       value: _isActiveAmenity,
                       onChanged: (val) => setState(() => _isActiveAmenity = val),
@@ -237,32 +341,24 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Submit Button
               Container(
                 width: double.infinity,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryContainer],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryContainer], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.primaryContainer.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5)),
-                  ],
+                  boxShadow: [BoxShadow(color: AppColors.primaryContainer.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
                 ),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isSubmitting ? null : _submitAmenity,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: Text(
-                    'ADD AMENITY',
-                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : Text('ADD AMENITY', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)),
                 ),
               ),
             ],
@@ -272,17 +368,14 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
     );
   }
 
-  Widget _buildUnderlineInput(String label, String hint, {int maxLines = 1, IconData? icon, bool isReadOnly = false}) {
+  Widget _buildUnderlineInput(String label, String hint, {int maxLines = 1, IconData? icon, TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0),
-        ),
+        Text(label.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0)),
         TextFormField(
+          controller: controller,
           maxLines: maxLines,
-          readOnly: isReadOnly,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurface),
           decoration: InputDecoration(
             hintText: hint,
@@ -293,30 +386,6 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
             enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.surfaceContainerHigh, width: 2)),
             focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary, width: 2)),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUnderlineDropdown(String label, String value, List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0),
-        ),
-        DropdownButtonFormField<String>(
-          value: value,
-          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.outline, size: 20),
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-          decoration: const InputDecoration(
-            contentPadding: EdgeInsets.symmetric(vertical: 8),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.surfaceContainerHigh, width: 2)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary, width: 2)),
-          ),
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          onChanged: (val) {},
         ),
       ],
     );
@@ -341,9 +410,6 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
     );
   }
 
-  // ==========================================
-  // SECTION 2: REQUESTS LIST
-  // ==========================================
   Widget _buildRequestsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,69 +417,63 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Recent Requests',
-              style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface),
-            ),
-            Text(
-              'VIEW ALL',
-              style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.0),
-            ),
+            Text('Recent Requests', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.onSurface)),
+            Text('VIEW ALL', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.0)),
           ],
         ),
         const SizedBox(height: 16),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('bookings')
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Text('No recent requests found.');
+            }
 
-        _buildRequestCard(
-          title: 'Gym Access',
-          id: 'ADM1056',
-          status: 'Pending',
-          date: 'Today',
-          time: '10:00 AM - 11:00 AM',
-          statusColor: AppColors.tertiaryFixedDim,
-          statusBg: AppColors.tertiaryFixed,
-          statusTextColor: AppColors.onTertiaryFixedVariant,
-          showActions: true,
-        ),
-        const SizedBox(height: 16),
-        _buildRequestCard(
-          title: 'Library Pod 04',
-          id: 'ADM1089',
-          status: 'Approved',
-          date: 'Tomorrow',
-          time: '02:00 PM',
-          statusColor: AppColors.secondary,
-          statusBg: AppColors.secondaryContainer,
-          statusTextColor: AppColors.onSecondaryContainer,
-          opacity: 0.8,
-        ),
-        const SizedBox(height: 16),
-        _buildRequestCard(
-          title: 'Music Room',
-          id: 'ADM1022',
-          status: 'Rejected',
-          date: 'Oct 25',
-          time: '04:00 PM',
-          statusColor: AppColors.error,
-          statusBg: AppColors.errorContainer,
-          statusTextColor: AppColors.onErrorContainer,
-          opacity: 0.8,
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: snapshot.data!.docs.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final doc = snapshot.data!.docs[index];
+                final data = doc.data() as Map<String, dynamic>;
+
+                return _buildRequestCard(
+                  docId: doc.id,
+                  title: data['amenityTitle'] ?? 'Unknown Amenity',
+                  id: data['uid'] ?? 'UNKNOWN_USER',
+                  status: data['status'] ?? 'Pending',
+                  timeInfo: data['time'] ?? 'No time specified',
+                );
+              },
+            );
+          },
         ),
       ],
     );
   }
 
   Widget _buildRequestCard({
+    required String docId,
     required String title,
     required String id,
     required String status,
-    required String date,
-    required String time,
-    required Color statusColor,
-    required Color statusBg,
-    required Color statusTextColor,
-    bool showActions = false,
-    double opacity = 1.0,
+    required String timeInfo,
   }) {
+    bool isPending = status.toLowerCase() == 'pending';
+    bool isApproved = status.toLowerCase() == 'confirmed';
+
+    Color statusColor = isPending ? AppColors.tertiaryFixedDim : (isApproved ? AppColors.secondary : AppColors.error);
+    Color statusBg = isPending ? AppColors.tertiaryFixed : (isApproved ? AppColors.secondaryContainer : AppColors.errorContainer);
+    Color statusTextColor = isPending ? AppColors.onTertiaryFixedVariant : (isApproved ? AppColors.onSecondaryContainer : AppColors.onErrorContainer);
+    double opacity = isPending ? 1.0 : 0.8;
+
     return Opacity(
       opacity: opacity,
       child: Container(
@@ -422,9 +482,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           border: Border(left: BorderSide(color: statusColor, width: 4)),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,57 +491,38 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'ID: $id',
-                      style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                      const SizedBox(height: 2),
+                      Text('User ID: $id', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1.0)),
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    status.toUpperCase(),
-                    style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w900, color: statusTextColor, letterSpacing: 0.5),
-                  ),
+                  child: Text(status.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w900, color: statusTextColor, letterSpacing: 0.5)),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_month, size: 16, color: AppColors.outline),
-                    const SizedBox(width: 6),
-                    Text(date, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant)),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Row(
-                  children: [
-                    const Icon(Icons.schedule, size: 16, color: AppColors.outline),
-                    const SizedBox(width: 6),
-                    Text(time, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant)),
-                  ],
-                ),
+                const Icon(Icons.schedule, size: 16, color: AppColors.outline),
+                const SizedBox(width: 6),
+                Expanded(child: Text(timeInfo, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant))),
               ],
             ),
-            if (showActions) ...[
+            if (isPending) ...[
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _updateRequestStatus(docId, 'Confirmed'),
                       icon: const Icon(Icons.check_circle, size: 16, color: Colors.white),
                       label: Text('Approve', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
@@ -498,7 +537,7 @@ class _AdminAmenitiesScreenState extends State<AdminAmenitiesScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _updateRequestStatus(docId, 'Rejected'),
                       icon: const Icon(Icons.cancel, size: 16, color: AppColors.error),
                       label: Text('Reject', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
                       style: OutlinedButton.styleFrom(
