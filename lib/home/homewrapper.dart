@@ -1,9 +1,10 @@
-import 'package:amber_hackathon/dashboard.dart';
+import 'package:amber_hackathon/home/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Import your tab screens here
 import '../complaints/complaints_screen.dart';
+import '../lost_and_found/lost_and_found_screen.dart';
 import '../mess_menu_screen.dart';
 import '../notice.dart';
 import '../setting.dart';
@@ -22,7 +23,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
 
   final List<Widget> _screens = const [
     Dashboard(),      // 0
-    MessMenuScreen(),     // 1
+    LostAndFoundScreen(),     // 1
     ComplaintsScreen(),   // 2
     SettingsScreen(),     // 3
   ];
@@ -32,7 +33,6 @@ class _HomeWrapperState extends State<HomeWrapper> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
 
-      // 1. YOUR CUSTOM APP BAR (Always visible)
       appBar: AppBar(
         backgroundColor: const Color(0xFFF7F9FC),
         elevation: 0,
@@ -126,13 +126,11 @@ class _HomeWrapperState extends State<HomeWrapper> {
         ],
       ),
 
-      // 2. THE BODY (Swaps between screens without losing scroll position)
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
 
-      // 3. YOUR BOTTOM NAVIGATION BAR (Always visible)
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (int index) {
@@ -141,7 +139,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
           });
         },
         backgroundColor: Colors.white,
-        indicatorColor: const Color(0xFFEEF2FF), // Soft indigo for active tab
+        indicatorColor: const Color(0xFFEEF2FF),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined, color: Color(0xFF9CA3AF)),
@@ -149,18 +147,18 @@ class _HomeWrapperState extends State<HomeWrapper> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.restaurant_outlined, color: Color(0xFF9CA3AF)),
-            selectedIcon: Icon(Icons.restaurant, color: Color(0xFF4338CA)),
+            icon: Icon(Icons.manage_search_outlined, color: Color(0xFF9CA3AF)),
+            selectedIcon: Icon(Icons.manage_search, color: Color(0xFF4338CA)),
             label: 'Lost/Found',
           ),
           NavigationDestination(
             icon: Icon(Icons.cleaning_services_outlined, color: Color(0xFF9CA3AF)),
             selectedIcon: Icon(Icons.cleaning_services, color: Color(0xFF4338CA)),
-            label: 'Booking',
+            label: 'Complaints',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Color(0xFF9CA3AF)),
-            selectedIcon: Icon(Icons.person, color: Color(0xFF4338CA)),
+            icon: Icon(Icons.shopping_bag_outlined, color: Color(0xFF9CA3AF)),
+            selectedIcon: Icon(Icons.shopping_bag, color: Color(0xFF4338CA)),
             label: 'Market Place',
           ),
         ],
